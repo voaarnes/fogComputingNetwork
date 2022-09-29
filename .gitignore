@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+# OMNET specific
+Makefile
+out/
