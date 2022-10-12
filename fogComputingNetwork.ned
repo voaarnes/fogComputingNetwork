@@ -20,12 +20,16 @@ simple Visualizer
 {
     parameters:
         @display("i=block/app");
+    
 }
 
 simple Cloud
 {
     parameters:
         @display("i=misc/cloud");
+    gates:
+        inout foggate;
+        inout hostgate;
 }
 
 
@@ -33,12 +37,18 @@ simple FogNode
 {
     parameters:
         @display("i=device/pc3");
+    gates:
+        inout hostgate;
+        inout cloudgate;
 }
 
 simple Host
 {
     parameters:
         @display("i=device/pocketpc");
+    gates:
+        inout foggate;
+        inout cloudgate;
 }
 
 
@@ -73,4 +83,7 @@ network fogComputingNetwork
         }
         
     connections:
+        cloud.foggate <--> Channel <--> computer.cloudgate;
+        cloud.hostgate <--> Channel <--> host.cloudgate;
+		computer.hostgate <--> Channel <--> host.foggate;
 }
