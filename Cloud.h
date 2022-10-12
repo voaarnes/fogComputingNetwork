@@ -19,7 +19,6 @@
 #include <omnetpp/csimplemodule.h>
 #include <stdio.h>
 #include <string.h>
-#include "computerMessage_m.h"
 #include <omnetpp.h>
 
 class Cloud: public omnetpp::cSimpleModule {
@@ -27,12 +26,6 @@ public:
     Cloud();
     virtual void initialize() override;
     virtual ~Cloud();
-    virtual void handleMessage(omnetpp::cMessage *msg) override;
-
-private:
-    void sendMessage(ComputerMessage* msg, int dest);
-    void resendLastMessage();
-    void ackMessage(ComputerMessage* msg);
 };
 
 Define_Module(Cloud);
