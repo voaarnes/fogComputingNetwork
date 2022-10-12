@@ -48,6 +48,7 @@ void Computer::handleMessage(omnetpp::cMessage *msg) {
 
 
            if (cMsg->getType() != 0){
+               EV << "ACKING";
                ackMessage(cMsg);
 
            }
@@ -95,7 +96,8 @@ void Computer::sendMessage(ComputerMessage* msg, int dest){
 
 void Computer::ackMessage(ComputerMessage* msg){
     ComputerMessage *ack;
-    if (msg->getSource() == 2){
+    int source = msg->getSource();
+    if (source == 2){
         ack = new ComputerMessage("ACK from Computer to Host");
     } else {
         ack = new ComputerMessage("ACK from Computer to Cloud");
@@ -104,6 +106,13 @@ void Computer::ackMessage(ComputerMessage* msg){
     ack->setType(0);
     ack->setSource(1);
 
+    if (source == 1){
+       EV << "This should not happen";
+   } else if (source == 2){
+       send(ack, "hostgate$o");
+   } else {
+       send(ack, "cloudgate$o");
+   }
 }
 
 

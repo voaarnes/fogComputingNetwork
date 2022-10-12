@@ -32,6 +32,9 @@ public:
     virtual ComputerMessage *generateNewMessage(char* str);
     virtual void sendMessage(ComputerMessage *msg, int dest);
     virtual void handleMessage(omnetpp::cMessage *msg) override;
+private:
+    void ackMessage(ComputerMessage* msg);
+    int lastDest;
 };
 Define_Module(Host);
 #endif /* HOST_H_ */

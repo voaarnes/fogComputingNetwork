@@ -28,7 +28,7 @@ ComputerMessage * timeoutMsg;
 ComputerMessage *lastMsg;
 int lastDest;
 bool isStarted = false;
-float timeout = 1.0f;
+int timeout = 1;
 bool lastAcked = false;
 
 
@@ -47,6 +47,7 @@ void Cloud::initialize() {
     message->setSource(0);
     message->setType(3);
     sendMessage(message, 2);
+
 }
 
 
@@ -62,7 +63,7 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
    if (msg == timeoutMsg){
        // REsend last
        ComputerMessage *toSend = lastMsg->dup();
-
+       EV << "TIMEOUT!\n";
        if (lastDest == 0){
            EV << "This should not happen";
        } else if (lastDest == 1){
@@ -70,8 +71,7 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
        } else {
            send(toSend, "hostgate$o");
        }
-       scheduleAt(omnetpp::simTime()+timeout, timeoutMsg);¨
-       return;
+       scheduleAt(omnetpp::simTime()+timeout, timeoutMsg);
    }
 
    ComputerMessage *cMsg = dynamic_cast<ComputerMessage *>(msg);
@@ -79,7 +79,8 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
 
        if (cMsg->getType() != 0){
            ackMessage(cMsg);
-           delete cMsg;
+
+
        }
 
        switch (cMsg->getType()){
@@ -114,8 +115,11 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
                EV << "This should not happen. case cloud: " <<  cMsg->getType() << "\n";
                break;
            }
+           delete cMsg;
        }
+
    }
+
 
 }
 
@@ -123,9 +127,8 @@ void Cloud::ackMessage(ComputerMessage* msg){
 
     char str[20] = "ACK from host to y";
 
-
-//ComputerMessage *ack;
-    if (msg->getSource() == 1){
+    int source = msg->getSource();
+    if (source == 1){
         char str[40] = "ACK from Cloud to Computer";
     } else {
         char str[40] = "ACK from Cloud to Computer";
@@ -133,7 +136,13 @@ void Cloud::ackMessage(ComputerMessage* msg){
     ComputerMessage *ack = generateNewMessage(str);
     ack->setType(0);
     ack->setSource(0);
-    sendMessage(ack, msg->getSource());
+    if (source == 0){
+       EV << "This should not happen";
+   } else if (source == 1){
+       send(ack, "foggate$o");
+   } else {
+       send(ack, "hostgate$o");
+   }
 
 }
 
@@ -153,7 +162,7 @@ void Cloud::sendMessage(ComputerMessage* msg, int dest){
     } else {
         send(toSend, "hostgate$o");
     }
-    scheduleAt(omnetpp::simTime()+timeout, timeoutMsg);
+    scheduleAt(omnetpp::simTime()+1, timeoutMsg);
 }
 
 

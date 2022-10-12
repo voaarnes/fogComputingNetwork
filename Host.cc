@@ -34,7 +34,7 @@ void Host::initialize(){
 
 ComputerMessage *Host::generateNewMessage(char* str){
     char msgname[20];
-    sprintf(msgname, "%d-%s", message->getSeq(), str);
+    sprintf(msgname, "%d-%s", 5, str);
     ComputerMessage *msg = new ComputerMessage(msgname);
     return msg;
 }
@@ -47,7 +47,7 @@ void Host::sendMessage(ComputerMessage *msg, int dest){
     }else{
         send(copy, "foggate$o");
     }
-
+    lastDest = dest;
     scheduleAt(omnetpp::simTime()+timeout, timeoutEvent);
 
 }
@@ -58,21 +58,14 @@ void Host::handleMessage(omnetpp::cMessage *msg){
 
         if(msg == timeoutEvent){
             EV << "RESEND MESSAGE\n";
-            sendMessage(message, 0);
+            sendMessage(message, lastDest);
         }
         else {
-            EV << "ACK arrived\n";
+
             ComputerMessage *cmmsg = omnetpp::check_and_cast<ComputerMessage *>(msg);
 
-
-
             if(cmmsg->getType() != 0){
-                char str[20] = "ACK from host to y";
-                message = generateNewMessage(str);
-                message->setSeq(message->getSeq()+1);
-                message->setSource(2);
-                message->setType(0);
-                sendMessage(message, cmmsg->getSource());
+                ackMessage(cmmsg);
             }
 
 
@@ -80,6 +73,7 @@ void Host::handleMessage(omnetpp::cMessage *msg){
               case 0:
               {
                   EV << "ACK received";
+                  cancelEvent(timeoutEvent);
                   break;
               }
               case 3:
@@ -114,5 +108,31 @@ void Host::handleMessage(omnetpp::cMessage *msg){
 
 
         }
+
+}
+
+
+
+
+void Host::ackMessage(ComputerMessage* msg){
+
+    char str[20] = "ACK from host to y";
+
+    int source = msg->getSource();
+    if (source == 1){
+        char str[40] = "ACK from Host to Computer";
+    } else {
+        char str[40] = "ACK from Host to Computer";
+    }
+    ComputerMessage *ack = generateNewMessage(str);
+    ack->setType(0);
+    ack->setSource(2);
+    if (source == 2){
+       EV << "This should not happen";
+   } else if (source == 1){
+       send(ack, "foggate$o");
+   } else {
+       send(ack, "cloudgate$o");
+   }
 
 }

@@ -33,7 +33,7 @@ simple Cloud
 }
 
 
-simple FogNode
+simple Computer
 {
     parameters:
         @display("i=device/pc3");
@@ -72,7 +72,7 @@ network fogComputingNetwork
         cloud: Cloud {
             @display("p=1281,64");
         }
-        computer: FogNode {
+        computer: Computer {
             @display("p=725,350");
         }
         host: Host {
