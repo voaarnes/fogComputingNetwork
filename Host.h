@@ -16,12 +16,22 @@
 #ifndef HOST_H_
 #define HOST_H_
 
+#include <omnetpp.h>
 #include <omnetpp/csimplemodule.h>
+#include "computerMessage_m.h"
 
 class Host: public omnetpp::cSimpleModule {
+private:
+    omnetpp::simtime_t timeout;         // timeout
+    omnetpp::cMessage *timeoutEvent;    // holds pointer to the timeout self-message
+    ComputerMessage *message;  // message that has to be re-sent on timeout
 public:
     Host();
     virtual ~Host();
+    virtual void initialize() override;
+    virtual ComputerMessage *generateNewMessage(char* str);
+    virtual void sendMessage(ComputerMessage *msg, int dest);
+    virtual void handleMessage(omnetpp::cMessage *msg) override;
 };
 Define_Module(Host);
 #endif /* HOST_H_ */

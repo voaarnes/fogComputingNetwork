@@ -24,3 +24,95 @@ Host::~Host() {
     // TODO Auto-generated destructor stub
 }
 
+
+void Host::initialize(){
+    timeout = 1.0;
+    timeoutEvent = new omnetpp::cMessage("timeoutEvent");
+
+}
+
+
+ComputerMessage *Host::generateNewMessage(char* str){
+    char msgname[20];
+    sprintf(msgname, "%d-%s", message->getSeq(), str);
+    ComputerMessage *msg = new ComputerMessage(msgname);
+    return msg;
+}
+
+void Host::sendMessage(ComputerMessage *msg, int dest){
+    ComputerMessage *copy = (ComputerMessage *)msg->dup();
+
+    if(dest == 0){
+        send(copy, "cloudgate$o");
+    }else{
+        send(copy, "foggate$o");
+    }
+
+    scheduleAt(omnetpp::simTime()+timeout, timeoutEvent);
+
+}
+
+
+
+void Host::handleMessage(omnetpp::cMessage *msg){
+
+        if(msg == timeoutEvent){
+            EV << "RESEND MESSAGE\n";
+            sendMessage(message, 0);
+        }
+        else {
+            EV << "ACK arrived\n";
+            ComputerMessage *cmmsg = omnetpp::check_and_cast<ComputerMessage *>(msg);
+
+
+
+            if(cmmsg->getType() != 0){
+                char str[20] = "ACK from host to y";
+                message = generateNewMessage(str);
+                message->setSeq(message->getSeq()+1);
+                message->setSource(2);
+                message->setType(0);
+                sendMessage(message, cmmsg->getSource());
+            }
+
+
+            switch(cmmsg->getType()) {
+              case 0:
+              {
+                  EV << "ACK received";
+                  break;
+              }
+              case 3:
+              {
+                  char str[50] = "Where is the book i am looking for?";
+                  message = generateNewMessage(str);
+                  message->setSeq(message->getSeq()+1);
+                  message->setSource(2);
+                  message->setType(3);
+                  sendMessage(message, 0);
+                  break;
+              }
+              case 4:{
+                  EV << "To be animated.";
+                  char str[20] = "Pay the book.";
+                  message = generateNewMessage(str);
+                  message->setSeq(message->getSeq()+1);
+                  message->setSource(2);
+                  message->setType(5);
+                  sendMessage(message, 1);
+                  break;
+              }
+              case 5:
+              {
+                  EV << "To be animated, walking out.";
+              }
+              default:
+              {
+                EV << "No coded response pepehands.";
+              }
+            }
+
+
+        }
+
+}

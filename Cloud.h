@@ -30,24 +30,12 @@ public:
     virtual void handleMessage(omnetpp::cMessage *msg) override;
 
 private:
+
+    omnetpp::simtime_t timeout;         // timeout
+    virtual ComputerMessage *generateNewMessage(char* str);
     void sendMessage(ComputerMessage* msg, int dest);
     void resendLastMessage();
     void ackMessage(ComputerMessage* msg);
-
-private:
-    uint8_t current_status = 0;
-    int currentSeq = 0;
-    ComputerMessage * timeoutMsg;
-    ComputerMessage *lastMsg;
-    int lastDest;
-    bool isStarted = false;
-    float timeout = 1.0f;
-    bool lastAcked = false;
-
-
-    char computerGate[10];
-    char hostGate[10];
-
 };
 
 Define_Module(Cloud);
