@@ -18,6 +18,7 @@ message ComputerMessage
 	    int globalSeq;
 	    // See enum MESSAGE_TYPE
 	    int type;
+	    int source;
 	    // Book title when requesting, or content of library
 	    //char content[1000];
 	}
