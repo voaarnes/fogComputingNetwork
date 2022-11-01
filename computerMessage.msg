@@ -15,6 +15,7 @@
 message ComputerMessage
 	{
 	    int seq;
+	    int globalSeq;
 	    // See enum MESSAGE_TYPE
 	    int type;
 	    int source;

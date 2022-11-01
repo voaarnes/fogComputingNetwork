@@ -38,6 +38,7 @@
  * message ComputerMessage
  * {
  *     int seq;
+ *     int globalSeq;
  *     // See enum MESSAGE_TYPE
  *     int type;
  *     int source;
@@ -50,6 +51,7 @@ class ComputerMessage : public ::omnetpp::cMessage
 {
   protected:
     int seq;
+    int globalSeq;
     int type;
     int source;
 
@@ -72,6 +74,8 @@ class ComputerMessage : public ::omnetpp::cMessage
     // field getter/setter methods
     virtual int getSeq() const;
     virtual void setSeq(int seq);
+    virtual int getGlobalSeq() const;
+    virtual void setGlobalSeq(int globalSeq);
     virtual int getType() const;
     virtual void setType(int type);
     virtual int getSource() const;

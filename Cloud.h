@@ -30,15 +30,9 @@ public:
     virtual void handleMessage(omnetpp::cMessage *msg) override;
 
 private:
-    uint8_t current_status = 0;
-    int currentSeq = 0;
-    ComputerMessage * timeoutMsg;
-    ComputerMessage *lastMsg;
-    int lastDest;
-    bool isStarted = false;
-    bool lastAcked = false;
     omnetpp::simtime_t timeout;         // timeout
-    virtual ComputerMessage *generateNewMessage(char* str);
+    omnetpp::cMessage *timeoutEvent;    // holds pointer to the timeout self-message
+    virtual ComputerMessage *generateNewMessage(char* str, int seq);
     void sendMessage(ComputerMessage* msg, int dest);
     void resendLastMessage();
     void ackMessage(ComputerMessage* msg);

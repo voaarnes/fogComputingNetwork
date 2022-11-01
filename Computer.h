@@ -13,27 +13,37 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef FOGNODE_H_
-#define FOGNODE_H_
+#ifndef COMPUTER_H_
+#define COMPUTER_H_
 
 //#include <omnetpp/csimplemodule.h>
 #include <omnetpp.h>
-#include "MessageType.h"
 #include "computerMessage_m.h"
 
-class FogNode: public omnetpp::cSimpleModule {
+class Computer: public omnetpp::cSimpleModule {
 public:
-    FogNode();
-    virtual ~FogNode();
+    Computer();
+    virtual ~Computer();
     virtual void initialize() override;
     virtual void handleMessage(omnetpp::cMessage *msg) override;
 
 private:
-    void sendMessage(ComputerMessage *msg); // Sends a message and starts timeout sequence
-    void SendContentsCloud(); // Send the library contents to the cloud
-    void LocateBook(); // Locates the book
-    void RecievePaymentForBook(); // Sells a book
-    void MarkBookAsSold(); // Will mark book as sold and updated the cloudd
+    void sendMessage(ComputerMessage* msg, int dest);
+    void resendLastMessage();
+    void ackMessage(ComputerMessage* msg);
+
+    //ComputerMessage * timeoutMsg;
+    omnetpp::cMessage *timeoutEvent;    // holds pointer to the timeout self-message
+    ComputerMessage *lastMsg;
+    int lastDest;
+
+
+    omnetpp::simtime_t timeout = 1.0;         // timeout
+    bool lastAcked = false;
+
+    char cloudGate[10];
+    char hostGate[10];
+
 };
-Define_Module(FogNode);
-#endif /* FOGNODE_H_ */
+Define_Module(Computer);
+#endif /* COMPUTER_H_ */

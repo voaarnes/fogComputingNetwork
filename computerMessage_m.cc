@@ -182,6 +182,7 @@ Register_Class(ComputerMessage)
 ComputerMessage::ComputerMessage(const char *name, short kind) : ::omnetpp::cMessage(name,kind)
 {
     this->seq = 0;
+    this->globalSeq = 0;
     this->type = 0;
     this->source = 0;
 }
@@ -206,6 +207,7 @@ ComputerMessage& ComputerMessage::operator=(const ComputerMessage& other)
 void ComputerMessage::copy(const ComputerMessage& other)
 {
     this->seq = other.seq;
+    this->globalSeq = other.globalSeq;
     this->type = other.type;
     this->source = other.source;
 }
@@ -214,6 +216,7 @@ void ComputerMessage::parsimPack(omnetpp::cCommBuffer *b) const
 {
     ::omnetpp::cMessage::parsimPack(b);
     doParsimPacking(b,this->seq);
+    doParsimPacking(b,this->globalSeq);
     doParsimPacking(b,this->type);
     doParsimPacking(b,this->source);
 }
@@ -222,6 +225,7 @@ void ComputerMessage::parsimUnpack(omnetpp::cCommBuffer *b)
 {
     ::omnetpp::cMessage::parsimUnpack(b);
     doParsimUnpacking(b,this->seq);
+    doParsimUnpacking(b,this->globalSeq);
     doParsimUnpacking(b,this->type);
     doParsimUnpacking(b,this->source);
 }
@@ -234,6 +238,16 @@ int ComputerMessage::getSeq() const
 void ComputerMessage::setSeq(int seq)
 {
     this->seq = seq;
+}
+
+int ComputerMessage::getGlobalSeq() const
+{
+    return this->globalSeq;
+}
+
+void ComputerMessage::setGlobalSeq(int globalSeq)
+{
+    this->globalSeq = globalSeq;
 }
 
 int ComputerMessage::getType() const
@@ -321,7 +335,7 @@ const char *ComputerMessageDescriptor::getProperty(const char *propertyname) con
 int ComputerMessageDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 3+basedesc->getFieldCount() : 3;
+    return basedesc ? 4+basedesc->getFieldCount() : 4;
 }
 
 unsigned int ComputerMessageDescriptor::getFieldTypeFlags(int field) const
@@ -336,8 +350,9 @@ unsigned int ComputerMessageDescriptor::getFieldTypeFlags(int field) const
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<4) ? fieldTypeFlags[field] : 0;
 }
 
 const char *ComputerMessageDescriptor::getFieldName(int field) const
@@ -350,10 +365,11 @@ const char *ComputerMessageDescriptor::getFieldName(int field) const
     }
     static const char *fieldNames[] = {
         "seq",
+        "globalSeq",
         "type",
         "source",
     };
-    return (field>=0 && field<3) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<4) ? fieldNames[field] : nullptr;
 }
 
 int ComputerMessageDescriptor::findField(const char *fieldName) const
@@ -361,8 +377,9 @@ int ComputerMessageDescriptor::findField(const char *fieldName) const
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount() : 0;
     if (fieldName[0]=='s' && strcmp(fieldName, "seq")==0) return base+0;
-    if (fieldName[0]=='t' && strcmp(fieldName, "type")==0) return base+1;
-    if (fieldName[0]=='s' && strcmp(fieldName, "source")==0) return base+2;
+    if (fieldName[0]=='g' && strcmp(fieldName, "globalSeq")==0) return base+1;
+    if (fieldName[0]=='t' && strcmp(fieldName, "type")==0) return base+2;
+    if (fieldName[0]=='s' && strcmp(fieldName, "source")==0) return base+3;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -378,8 +395,9 @@ const char *ComputerMessageDescriptor::getFieldTypeString(int field) const
         "int",
         "int",
         "int",
+        "int",
     };
-    return (field>=0 && field<3) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<4) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **ComputerMessageDescriptor::getFieldPropertyNames(int field) const
@@ -447,8 +465,9 @@ std::string ComputerMessageDescriptor::getFieldValueAsString(void *object, int f
     ComputerMessage *pp = (ComputerMessage *)object; (void)pp;
     switch (field) {
         case 0: return long2string(pp->getSeq());
-        case 1: return long2string(pp->getType());
-        case 2: return long2string(pp->getSource());
+        case 1: return long2string(pp->getGlobalSeq());
+        case 2: return long2string(pp->getType());
+        case 3: return long2string(pp->getSource());
         default: return "";
     }
 }
@@ -464,8 +483,9 @@ bool ComputerMessageDescriptor::setFieldValueAsString(void *object, int field, i
     ComputerMessage *pp = (ComputerMessage *)object; (void)pp;
     switch (field) {
         case 0: pp->setSeq(string2long(value)); return true;
-        case 1: pp->setType(string2long(value)); return true;
-        case 2: pp->setSource(string2long(value)); return true;
+        case 1: pp->setGlobalSeq(string2long(value)); return true;
+        case 2: pp->setType(string2long(value)); return true;
+        case 3: pp->setSource(string2long(value)); return true;
         default: return false;
     }
 }

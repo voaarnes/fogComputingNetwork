@@ -32,9 +32,9 @@ void Host::initialize(){
 }
 
 
-ComputerMessage *Host::generateNewMessage(char* str){
-    char msgname[20];
-    sprintf(msgname, "%d-%s", 1, str);
+ComputerMessage *Host::generateNewMessage(char* str, int seq){
+    char msgname[40];
+    sprintf(msgname, "%d-%s", 4, str);
     ComputerMessage *msg = new ComputerMessage(msgname);
     return msg;
 }
@@ -47,7 +47,7 @@ void Host::sendMessage(ComputerMessage *msg, int dest){
     }else{
         send(copy, "foggate$o");
     }
-
+    lastDest = dest;
     scheduleAt(omnetpp::simTime()+timeout, timeoutEvent);
 
 }
@@ -56,23 +56,17 @@ void Host::sendMessage(ComputerMessage *msg, int dest){
 
 void Host::handleMessage(omnetpp::cMessage *msg){
 
+        EV << "Host received msg";
         if(msg == timeoutEvent){
             EV << "RESEND MESSAGE\n";
             sendMessage(message, 0);
         }
         else {
-            EV << "ACK arrived\n";
+
             ComputerMessage *cmmsg = omnetpp::check_and_cast<ComputerMessage *>(msg);
 
-
-
             if(cmmsg->getType() != 0){
-                char str[20] = "ACK from host to y";
-                message = generateNewMessage(str);
-                message->setSeq(message->getSeq()+1);
-                message->setSource(2);
-                message->setType(0);
-                sendMessage(message, cmmsg->getSource());
+                ackMessage(cmmsg);
             }
 
 
@@ -83,11 +77,12 @@ void Host::handleMessage(omnetpp::cMessage *msg){
                   cancelEvent(timeoutEvent);
                   break;
               }
-              case 3:
+              case 2:
               {
+                  EV << "Book request";
                   char str[50] = "Where is the book i am looking for?";
-                  message = generateNewMessage(str);
-                  message->setSeq(message->getSeq()+1);
+                  message = generateNewMessage(str, cmmsg->getSeq());
+                  message->setSeq(cmmsg->getSeq()+1);
                   message->setSource(2);
                   message->setType(3);
                   sendMessage(message, 0);
@@ -96,8 +91,8 @@ void Host::handleMessage(omnetpp::cMessage *msg){
               case 4:{
                   EV << "To be animated.";
                   char str[20] = "Pay the book.";
-                  message = generateNewMessage(str);
-                  message->setSeq(message->getSeq()+1);
+                  message = generateNewMessage(str, cmmsg->getSeq());
+                  message->setSeq(cmmsg->getSeq()+1);
                   message->setSource(2);
                   message->setType(5);
                   sendMessage(message, 1);
@@ -115,5 +110,31 @@ void Host::handleMessage(omnetpp::cMessage *msg){
 
 
         }
+
+}
+
+
+
+
+void Host::ackMessage(ComputerMessage* msg){
+
+    char str[40] = "ACK from host to y";
+
+    int source = msg->getSource();
+    if (source == 0){
+        char str[40] = "ACK from Host to Cloud";
+    } else {
+        char str[40] = "ACK from Host to Computer";
+    }
+    ComputerMessage *ack = generateNewMessage(str, msg->getSeq());
+    ack->setType(0);
+    ack->setSource(2);
+    if (source == 2){
+       EV << "This should not happen";
+   } else if (source == 1){
+       send(ack, "foggate$o");
+   } else {
+       send(ack, "cloudgate$o");
+   }
 
 }
