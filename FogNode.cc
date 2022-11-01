@@ -1,4 +1,4 @@
-//
+    //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -11,32 +11,29 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-//
+// 
+
+#include "FogNode.h"
 
 
+FogNode::FogNode() {
+    // TODO Auto-generated constructor stub
 
+}
 
-simple Visualizer
-{
-    parameters:
-        @display("i=block/app");
+FogNode::~FogNode() {
+    // TODO Auto-generated destructor stub
+}
+
+void FogNode::initialize() {
+    // Send contents to cloud
+
+}
+void FogNode::handleMessage(omnetpp::cMessage *msg) {
+
 }
 
 
+void FogNode::sendMessage(ComputerMessage *msg){
 
-
-network fogComputingNetwork
-{
-    @display("bgb=491,298");
-    types:
-        channel Channel extends ned.DelayChannel
-        {
-            delay = 100ms;
-        }
-    submodules:
-        visualizer: Visualizer {
-            @display("p=457,31");
-        }
-        
-    connections:
 }
