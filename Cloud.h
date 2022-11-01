@@ -31,7 +31,6 @@ public:
     virtual void handleMessage(omnetpp::cMessage *msg) override;
 
 private:
-
     omnetpp::simtime_t timeout;         // timeout
     int lastSeq = 0;
     virtual ComputerMessage *generateNewMessage(char* str);

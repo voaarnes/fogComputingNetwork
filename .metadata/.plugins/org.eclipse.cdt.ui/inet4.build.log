@@ -1,0 +1,13 @@
+12:02:09 **** Incremental Build of configuration release for project inet4 ****
+make MODE=release -j12 all 
+make[1]: Entering directory '/home/vegard/omnetpp-5.7/samples/inet4/src'
+*** COMPILING with:
+g++ -c  -O3 -DNDEBUG=1   -MMD -MP -MF .d  -fPIC  -fno-omit-frame-pointer -DHAVE_SWAPCONTEXT -DXMLPARSER=expat -DPREFER_QTENV -DWITH_QTENV -DWITH_PARSIM -DWITH_NETBUILDER -DWITH_OSG -Wno-overloaded-virtual -include inet/common/precompiled_release.h -DOMNETPPLIBS_IMPORT -DINET_EXPORT -I. -I/home/vegard/omnetpp-5.7/include
+*** LINKING with:
+g++ -shared -fPIC -o ../out/gcc-release/src/libINET.so -Wl,--no-as-needed -Wl,--whole-archive  -Wl,--no-whole-archive -loppenvir -loppsim -lstdc++  -losg -losgText -losgDB -losgGA -losgViewer -losgUtil -lOpenThreads    -Wl,-rpath,/home/vegard/omnetpp-5.7/lib -Wl,-rpath,/lib -Wl,-rpath,.  -Wl,--export-dynamic -L/home/vegard/omnetpp-5.7/lib
+Building...
+make[1]: Nothing to be done for 'all-pch'.
+make[1]: Leaving directory '/home/vegard/omnetpp-5.7/samples/inet4/src'
+
+12:02:12 Build Finished. 0 errors, 0 warnings. (took 2s.738ms)
+

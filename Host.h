@@ -30,9 +30,10 @@ public:
     Host();
     virtual ~Host();
     virtual void initialize() override;
-    virtual ComputerMessage *generateNewMessage(char* str);
+    virtual ComputerMessage *generateNewMessage(char* str, int seq);
     virtual void sendMessage(ComputerMessage *msg, int dest);
     virtual void handleMessage(omnetpp::cMessage *msg) override;
+
 private:
     void ackMessage(ComputerMessage* msg);
     int lastDest;

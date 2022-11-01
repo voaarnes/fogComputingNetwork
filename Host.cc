@@ -32,9 +32,9 @@ void Host::initialize(){
 }
 
 
-ComputerMessage *Host::generateNewMessage(char* str){
-    char msgname[20];
-    sprintf(msgname, "%d-%s", 5, str);
+ComputerMessage *Host::generateNewMessage(char* str, int seq){
+    char msgname[40];
+    sprintf(msgname, "%d-%s", 4, str);
     ComputerMessage *msg = new ComputerMessage(msgname);
     return msg;
 }
@@ -56,9 +56,10 @@ void Host::sendMessage(ComputerMessage *msg, int dest){
 
 void Host::handleMessage(omnetpp::cMessage *msg){
 
+        EV << "Host received msg";
         if(msg == timeoutEvent){
             EV << "RESEND MESSAGE\n";
-            sendMessage(message, lastDest);
+            sendMessage(message, 0);
         }
         else {
 
@@ -78,9 +79,10 @@ void Host::handleMessage(omnetpp::cMessage *msg){
               }
               case MSG_CLOUD_RDY:
               {
+                  EV << "Book request";
                   char str[50] = "Where is the book i am looking for?";
-                  message = generateNewMessage(str);
-                  message->setSeq(message->getSeq()+1);
+                  message = generateNewMessage(str, cmmsg->getSeq());
+                  message->setSeq(cmmsg->getSeq()+1);
                   message->setSource(2);
                   message->setType(3);
                   sendMessage(message, 0);
@@ -89,8 +91,8 @@ void Host::handleMessage(omnetpp::cMessage *msg){
               case 4:{
                   EV << "To be animated.";
                   char str[20] = "Pay the book.";
-                  message = generateNewMessage(str);
-                  message->setSeq(message->getSeq()+1);
+                  message = generateNewMessage(str, cmmsg->getSeq());
+                  message->setSeq(cmmsg->getSeq()+1);
                   message->setSource(2);
                   message->setType(MSG_BOOK_PAY);
                   sendMessage(message, 1);
@@ -116,7 +118,7 @@ void Host::handleMessage(omnetpp::cMessage *msg){
 
 void Host::ackMessage(ComputerMessage* msg){
 
-    char str[20] = "ACK from host to y";
+    char str[40] = "ACK from host to y";
 
     int source = msg->getSource();
     if (source == 1){
@@ -124,7 +126,7 @@ void Host::ackMessage(ComputerMessage* msg){
     } else {
         sprintf(str, "ACK from Host to Cloud");
     }
-    ComputerMessage *ack = generateNewMessage(str);
+    ComputerMessage *ack = generateNewMessage(str, msg->getSeq());
     ack->setType(0);
     ack->setSource(2);
     if (source == 2){

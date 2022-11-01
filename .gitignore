@@ -33,4 +33,8 @@
 
 # OMNET specific
 Makefile
-out/
+out/    
+computerMessage_m.cc
+computerMessage_m.h
+fogComputingNetwork_dbg
+fogComputingNetwork

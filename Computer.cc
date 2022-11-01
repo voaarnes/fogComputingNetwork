@@ -25,7 +25,7 @@ Computer::Computer() {
 
 Computer::~Computer() {
     // TODO Auto-generated destructor stub
-    delete timeoutMsg;
+    delete timeoutEvent;
 }
 
 ComputerMessage *Computer::generateNewMessage(char* str){
@@ -38,8 +38,16 @@ ComputerMessage *Computer::generateNewMessage(char* str){
 
 void Computer::initialize() {
     // Send contents to cloud
-    timeoutMsg = new ComputerMessage("timeout");
+    //timeoutEvent = new ComputerMessage("timeout");
 
+    timeoutEvent = new omnetpp::cMessage("timeoutEvent");
+
+    char str[40] = "1-Contents of Book Table";
+    ComputerMessage *message = new ComputerMessage(str); // Creating placeholder message for access to variables in generate.
+    message->setSeq(1);
+    message->setSource(1);
+    message->setType(1);
+    sendMessage(message, 0);
 
     // Send contents
 
@@ -55,7 +63,7 @@ void Computer::initialize() {
 
 }
 void Computer::handleMessage(omnetpp::cMessage *msg) {
-    if (msg == timeoutMsg){
+    if (msg == timeoutEvent){
            // REsend last
            resendLastMessage();
        }
@@ -73,7 +81,7 @@ void Computer::handleMessage(omnetpp::cMessage *msg) {
            switch (cMsg->getType()){
                case MSG_ACK: {
                    lastAcked = true;
-                   cancelEvent(timeoutMsg);
+                   cancelEvent(timeoutEvent);
                    break;
                }
                case MSG_BOOK_PAY: {
@@ -120,7 +128,7 @@ void Computer::sendMessage(ComputerMessage* msg, int dest){
     } else {
         //send(toSend, "hostgate$o");
     }
-    scheduleAt(omnetpp::simTime()+timeout, timeoutMsg);
+    scheduleAt(omnetpp::simTime()+timeout, timeoutEvent);
 }
 
 void Computer::ackMessage(ComputerMessage* msg){
@@ -153,7 +161,7 @@ void Computer::resendLastMessage(){
     } else if (lastDest == 2){
         send(toSend, "hostgate$o");
     } else {
-        send(toSend, "hostgate$o");
+        send(toSend, "cloudgate$o");
     }
-    scheduleAt(omnetpp::simTime()+timeout, timeoutMsg);
+    scheduleAt(omnetpp::simTime()+timeout, timeoutEvent);
 }
