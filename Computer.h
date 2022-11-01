@@ -30,11 +30,13 @@ public:
 
 private:
     void sendMessage(ComputerMessage* msg, int dest);
-    void resendLastMessage();
+    void resendLastMessage(int dest);
     void ackMessage(ComputerMessage* msg);
 
-    ComputerMessage * timeoutMsg;
-    ComputerMessage *lastMsg = NULL;
+    ComputerMessage * timeoutHost;
+    ComputerMessage * timeoutCloud;
+    ComputerMessage *lastHost = NULL;
+    ComputerMessage *lastCloud = NULL;
     ComputerMessage *generateNewMessage(char* str);
     int lastDest;
     int lastSeq = 0;

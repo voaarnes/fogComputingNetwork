@@ -70,6 +70,14 @@ network fogComputingNetwork
         {
             delay = 100ms;
         }
+        channel Channel2 extends ned.DelayChannel
+        {
+            delay = 200ms;
+        }
+        channel Channel3 extends ned.DelayChannel
+        {
+            delay = 250ms;
+        }
     submodules:
         cloud: Cloud {
         	
@@ -86,7 +94,7 @@ network fogComputingNetwork
         }
         
     connections:
-        cloud.foggate <--> Channel <--> computer.cloudgate;
-        cloud.hostgate <--> Channel <--> host.cloudgate;
+        cloud.foggate <--> Channel2 <--> computer.cloudgate;
+        cloud.hostgate <--> Channel3 <--> host.cloudgate;
 		computer.hostgate <--> Channel <--> host.foggate;
 }

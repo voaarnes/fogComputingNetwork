@@ -22,14 +22,17 @@ Host::Host() {
 
 Host::~Host() {
     // TODO Auto-generated destructor stub
-    cancelEvent(timeoutMsg);
-    delete timeoutMsg;
+    cancelEvent(timeoutCloud);
+    cancelEvent(timeoutFog);
+    delete timeoutFog;
+    delete timeoutCloud;
 }
 
 
 void Host::initialize(){
     timeout = 1.0;
-    timeoutMsg = new omnetpp::cMessage("timeoutMsg");
+    timeoutFog = new ComputerMessage("timeoutFog");
+    timeoutCloud = new ComputerMessage("timeoutCloud");
 
 }
 
@@ -45,22 +48,21 @@ ComputerMessage *Host::generateNewMessage(char* str){
 }
 
 void Host::sendMessage(ComputerMessage* msg, int dest){
-    if (lastMsg != NULL){
-        delete lastMsg;
-    }
 
-    lastMsg = msg;
     ComputerMessage *toSend = msg->dup();
-    lastDest = dest;
-    lastAcked = false;
+
     if (dest == 2){
         EV << "This should not happen";
-    } else if (dest == 1){
-        send(toSend, "foggate$o");
-    } else {
+    } else if (dest == 0){
         send(toSend, "cloudgate$o");
+        lastCloud = msg;
+        scheduleAt(omnetpp::simTime()+timeout, timeoutCloud);
+    } else {
+        send(toSend, "foggate$o");
+        lastFog = msg;
+        scheduleAt(omnetpp::simTime()+timeout, timeoutFog);
     }
-    scheduleAt(omnetpp::simTime()+1, timeoutMsg);
+
 }
 
 
@@ -68,11 +70,16 @@ void Host::sendMessage(ComputerMessage* msg, int dest){
 
 void Host::handleMessage(omnetpp::cMessage *msg){
 
-        if(msg == timeoutMsg){
-            resendLastMessage();
+        if(msg == timeoutCloud){
+            resendLastMessage(0);
             delete msg;
             return;
         }
+        if(msg == timeoutFog){
+                    resendLastMessage(1);
+                    delete msg;
+                    return;
+                }
         else {
 
 
@@ -84,18 +91,24 @@ void Host::handleMessage(omnetpp::cMessage *msg){
             }
             ComputerMessage *cmmsg = omnetpp::check_and_cast<ComputerMessage *>(msg);
             if(cmmsg->getType() != 0){
-                EV << "ACKKS";
                 ackMessage(cmmsg);
             }
             int type = cmmsg->getType();
+            int src = cmmsg->getSource();
             delete cmmsg;
 
             switch(type) {
               case 0:
               {
-                  EV << "ACK received";
-                  cancelEvent(timeoutMsg);
-                  break;
+                  if (src == 0){
+                     cancelEvent(timeoutCloud);
+                     delete lastCloud;
+                 } else {
+                     cancelEvent(timeoutFog);
+                     delete lastFog;
+                 }
+
+                 break;
               }
               case MSG_CLOUD_RDY:
               {
@@ -165,15 +178,20 @@ void Host::ackMessage(ComputerMessage* msg){
 }
 
 
-void Host::resendLastMessage(){
-    ComputerMessage *toSend = lastMsg->dup();
+void Host::resendLastMessage(int dest){
 
-    if (lastDest == 2){
+
+    if (dest == 2){
         EV << "This should not happen";
-    } else if (lastDest == 1){
+    } else if (dest == 1){
+        ComputerMessage *toSend = lastFog->dup();
         send(toSend, "foggate$o");
+        scheduleAt(omnetpp::simTime()+timeout, timeoutFog);
+
     } else {
+        ComputerMessage *toSend = lastCloud->dup();
         send(toSend, "cloudgate$o");
+        scheduleAt(omnetpp::simTime()+timeout, timeoutCloud);
     }
-    scheduleAt(omnetpp::simTime()+timeout, timeoutMsg);
+
 }

@@ -26,8 +26,10 @@ Computer::Computer() {
 
 Computer::~Computer() {
     // TODO Auto-generated destructor stub
-    cancelEvent(timeoutMsg);
-    delete timeoutMsg;
+    cancelEvent(timeoutHost);
+    cancelEvent(timeoutCloud);
+    delete timeoutCloud;
+    delete timeoutHost;
 }
 
 ComputerMessage *Computer::generateNewMessage(char* str){
@@ -42,8 +44,8 @@ ComputerMessage *Computer::generateNewMessage(char* str){
 
 void Computer::initialize() {
     // Send contents to cloud
-    timeoutMsg = new ComputerMessage("timeout");
-
+    timeoutHost = new ComputerMessage("timeoutHost");
+    timeoutCloud = new ComputerMessage("timeoutCloud");
 
     // Send contents
 
@@ -56,11 +58,16 @@ void Computer::initialize() {
 
 }
 void Computer::handleMessage(omnetpp::cMessage *msg) {
-    if (msg == timeoutMsg){
+    if (msg == timeoutHost){
            // REsend last
-           resendLastMessage();
+           resendLastMessage(2);
            return;
        }
+    if (msg == timeoutCloud){
+               // REsend last
+               resendLastMessage(0);
+               return;
+           }
 
        ComputerMessage *cMsg = dynamic_cast<ComputerMessage *>(msg);
        if (cMsg != NULL){
@@ -72,11 +79,18 @@ void Computer::handleMessage(omnetpp::cMessage *msg) {
 
            }
            int type = cMsg->getType();
+           int src = cMsg->getSource();
            delete cMsg;
            switch (type){
                case MSG_ACK: {
-                   lastAcked = true;
-                   cancelEvent(timeoutMsg);
+                   if (src == 0){
+                       cancelEvent(timeoutCloud);
+                       delete lastCloud;
+                   } else {
+                       cancelEvent(timeoutHost);
+                       delete lastHost;
+                   }
+
                    break;
                }
                case MSG_BOOK_PAY: {
@@ -108,22 +122,24 @@ void Computer::handleMessage(omnetpp::cMessage *msg) {
 }
 
 void Computer::sendMessage(ComputerMessage* msg, int dest){
-    if (lastMsg != NULL){
-        delete lastMsg;
-    }
-    lastMsg = msg;
+
     ComputerMessage *toSend = msg->dup();
-    lastDest = dest;
-    lastAcked = false;
 
     if (dest == 1){
         EV << "This should not happen";
     } else if (dest == 0){
         send(toSend, "cloudgate$o");
+
+        lastCloud = msg;
+        scheduleAt(omnetpp::simTime()+timeout, timeoutCloud);
     } else {
         send(toSend, "hostgate$o");
+
+
+        lastHost = msg;
+        scheduleAt(omnetpp::simTime()+timeout, timeoutHost);
     }
-    scheduleAt(omnetpp::simTime()+timeout, timeoutMsg);
+
 }
 
 void Computer::ackMessage(ComputerMessage* msg){
@@ -150,15 +166,20 @@ void Computer::ackMessage(ComputerMessage* msg){
 }
 
 
-void Computer::resendLastMessage(){
-    ComputerMessage *toSend = lastMsg->dup();
+void Computer::resendLastMessage(int dest){
 
-    if (lastDest == 1){
+
+    if (dest == 1){
         EV << "This should not happen";
-    } else if (lastDest == 2){
+    } else if (dest == 2){
+        ComputerMessage *toSend = lastHost->dup();
         send(toSend, "hostgate$o");
+        scheduleAt(omnetpp::simTime()+timeout, timeoutHost);
+
     } else {
+        ComputerMessage *toSend = lastCloud->dup();
         send(toSend, "cloudgate$o");
+        scheduleAt(omnetpp::simTime()+timeout, timeoutCloud);
     }
-    scheduleAt(omnetpp::simTime()+timeout, timeoutMsg);
+
 }

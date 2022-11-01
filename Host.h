@@ -25,6 +25,7 @@ class Host: public omnetpp::cSimpleModule {
 private:
     omnetpp::simtime_t timeout;         // timeout
     omnetpp::cMessage *timeoutMsg;    // holds pointer to the timeout self-message
+    omnetpp::cMessage *doneWalkingMsg;    // holds pointer to the timeout self-message
     ComputerMessage *message;  // message that has to be re-sent on timeout
 public:
     Host();
@@ -33,12 +34,13 @@ public:
     virtual ComputerMessage *generateNewMessage(char* str);
     virtual void sendMessage(ComputerMessage *msg, int dest);
     virtual void handleMessage(omnetpp::cMessage *msg) override;
-    virtual void resendLastMessage();
+    virtual void resendLastMessage(int dest);
 private:
     void ackMessage(ComputerMessage* msg);
-    ComputerMessage *lastMsg = NULL;
-    bool lastAcked;
-    int lastDest;
+    ComputerMessage * timeoutFog;
+    ComputerMessage * timeoutCloud;
+    ComputerMessage *lastFog = NULL;
+    ComputerMessage *lastCloud = NULL;
     int lastSeq = 0;
 
     int msgLost = 0;

@@ -37,8 +37,12 @@ private:
     int msgLost = 0;
     virtual ComputerMessage *generateNewMessage(char* str);
     void sendMessage(ComputerMessage* msg, int dest);
-    void resendLastMessage();
+    void resendLastMessage(int dest);
     void ackMessage(ComputerMessage* msg);
+    ComputerMessage * timeoutFog;
+    ComputerMessage * timeoutHost;
+    ComputerMessage *lastFog = NULL;
+    ComputerMessage *lastHost = NULL;
 
 };
 
