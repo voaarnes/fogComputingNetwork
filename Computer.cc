@@ -28,12 +28,29 @@ Computer::~Computer() {
     delete timeoutMsg;
 }
 
+ComputerMessage *Computer::generateNewMessage(char* str){
+    char msgname[20];
+    sprintf(msgname, "%d-%s", lastSeq, str);
+    ComputerMessage *msg = new ComputerMessage(msgname);
+
+    return msg;
+}
+
 void Computer::initialize() {
     // Send contents to cloud
     timeoutMsg = new ComputerMessage("timeout");
 
 
     // Send contents
+
+    char str[20] = "Book contents";
+    ComputerMessage *message = generateNewMessage(str); // Creating placeholder message for access to variables in generate.
+    message->setSeq(1);
+    message->setSource(1);
+
+    message->setType(MSG_CONTENTS);
+    sendMessage(message, 0);
+
 
 
 }
@@ -50,23 +67,33 @@ void Computer::handleMessage(omnetpp::cMessage *msg) {
            if (cMsg->getType() != 0){
                EV << "ACKING";
                ackMessage(cMsg);
+               lastSeq = cMsg->getSeq();
 
            }
            switch (cMsg->getType()){
-               case 0: {
+               case MSG_ACK: {
                    lastAcked = true;
                    cancelEvent(timeoutMsg);
                    break;
                }
-               case 5: {
+               case MSG_BOOK_PAY: {
                    EV << "Host pay\n";
                    // Send paid
                    // Send contents
 
+
+                   char str[20] = "Book contents";
+                   ComputerMessage *message = generateNewMessage(str); // Creating placeholder message for access to variables in generate.
+                   message->setSeq(1);
+                   message->setSource(1);
+
+                   message->setType(MSG_CONTENTS);
+                   sendMessage(message, 0);
+
                    break;
                }
                default: {
-                   EV << "This should not happen. case cloud: " <<  cMsg->getType() << "\n";
+                   EV << "This should not happen. case computer: " <<  cMsg->getType() << "\n";
                    break;
                }
            }
@@ -87,9 +114,11 @@ void Computer::sendMessage(ComputerMessage* msg, int dest){
     if (dest == 1){
         EV << "This should not happen";
     } else if (dest == 0){
-        send(toSend, cloudGate);
+        //send(toSend, cloudGate);
+        EV << "TEST\n";
+        send(toSend, "cloudgate$o");
     } else {
-        send(toSend, hostGate);
+        //send(toSend, "hostgate$o");
     }
     scheduleAt(omnetpp::simTime()+timeout, timeoutMsg);
 }
@@ -122,9 +151,9 @@ void Computer::resendLastMessage(){
     if (lastDest == 1){
         EV << "This should not happen";
     } else if (lastDest == 2){
-        send(toSend, hostGate);
+        send(toSend, "hostgate$o");
     } else {
-        send(toSend, cloudGate);
+        send(toSend, "hostgate$o");
     }
     scheduleAt(omnetpp::simTime()+timeout, timeoutMsg);
 }

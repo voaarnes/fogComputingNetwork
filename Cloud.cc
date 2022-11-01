@@ -41,20 +41,23 @@ void Cloud::initialize() {
     timeoutMsg = new ComputerMessage("timeout");
 
 
+    /*
     char str[20] = "Hello";
     ComputerMessage *message = new ComputerMessage(str); // Creating placeholder message for access to variables in generate.
     message->setSeq(1);
     message->setSource(0);
     message->setType(3);
     sendMessage(message, 2);
-
+*/
 }
 
 
 ComputerMessage *Cloud::generateNewMessage(char* str){
     char msgname[20];
-    sprintf(msgname, "%d-%s", lastMsg->getSeq(), str);
+    lastSeq++;
+    sprintf(msgname, "%d-%s", lastSeq, str);
     ComputerMessage *msg = new ComputerMessage(msgname);
+
     return msg;
 }
 
@@ -79,7 +82,7 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
 
        if (cMsg->getType() != 0){
            ackMessage(cMsg);
-
+           lastSeq = cMsg->getSeq();
 
        }
 
@@ -89,13 +92,14 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
                cancelEvent(timeoutMsg);
                break;
            }
-           case 1: {
+           case MSG_CONTENTS: {
                EV << "Received contents\n";
                if (!isStarted) {
                   ComputerMessage* newMsg = new ComputerMessage("Cloud ready to start");
-                  newMsg->setType(2);
+                  newMsg->setType(MSG_CLOUD_RDY);
                   newMsg->setSource(0);
                   sendMessage(newMsg, 3);
+                  isStarted = true;
                }
 
                break;
@@ -125,15 +129,17 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
 
 void Cloud::ackMessage(ComputerMessage* msg){
 
-    char str[20] = "ACK from host to y";
-
+    //char str[30] = "ACK from Cloud to Computer";
+    ComputerMessage *ack; // = new ComputerMessage(str);;
     int source = msg->getSource();
     if (source == 1){
-        char str[40] = "ACK from Cloud to Computer";
+        char str[30] = "ACK from Cloud to Host";
+        ack = new ComputerMessage(str);
     } else {
-        char str[40] = "ACK from Cloud to Computer";
+        char str[30] = "ACK from Cloud to Computer";
+        ack = new ComputerMessage(str);
     }
-    ComputerMessage *ack = generateNewMessage(str);
+
     ack->setType(0);
     ack->setSource(0);
     if (source == 0){

@@ -19,6 +19,7 @@
 #include <omnetpp.h>
 #include <omnetpp/csimplemodule.h>
 #include "computerMessage_m.h"
+#include "MessageType.h"
 
 class Host: public omnetpp::cSimpleModule {
 private:

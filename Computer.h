@@ -19,6 +19,7 @@
 //#include <omnetpp/csimplemodule.h>
 #include <omnetpp.h>
 #include "computerMessage_m.h"
+#include "MessageType.h"
 
 class Computer: public omnetpp::cSimpleModule {
 public:
@@ -33,14 +34,13 @@ private:
     void ackMessage(ComputerMessage* msg);
 
     ComputerMessage * timeoutMsg;
-    ComputerMessage *lastMsg;
+    ComputerMessage *lastMsg = NULL;
+    ComputerMessage *generateNewMessage(char* str);
     int lastDest;
+    int lastSeq = 0;
 
     float timeout = 1.0f;
     bool lastAcked = false;
-
-    char cloudGate[10];
-    char hostGate[10];
 
 };
 Define_Module(Computer);

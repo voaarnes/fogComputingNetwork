@@ -9,7 +9,7 @@
 #define MESSAGETYPE_H_
 
 // TEMP
-int networktype = 0;
+//int networktype = 0;
 
 
 enum {

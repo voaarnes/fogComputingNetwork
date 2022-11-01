@@ -37,9 +37,9 @@ class ComputerMessage;
  * message ComputerMessage
  * {
  *     int seq;
- *     int globalSeq;
  *     // See enum MESSAGE_TYPE
  *     int type;
+ *     int source;
  * 	    // Book title when requesting, or content of library
  * 	    //char content[1000];
  * }
@@ -49,8 +49,8 @@ class ComputerMessage : public ::omnetpp::cMessage
 {
   protected:
     int seq = 0;
-    int globalSeq = 0;
     int type = 0;
+    int source = 0;
 
   private:
     void copy(const ComputerMessage& other);
@@ -70,11 +70,11 @@ class ComputerMessage : public ::omnetpp::cMessage
     virtual int getSeq() const;
     virtual void setSeq(int seq);
 
-    virtual int getGlobalSeq() const;
-    virtual void setGlobalSeq(int globalSeq);
-
     virtual int getType() const;
     virtual void setType(int type);
+
+    virtual int getSource() const;
+    virtual void setSource(int source);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const ComputerMessage& obj) {obj.parsimPack(b);}

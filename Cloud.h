@@ -21,6 +21,7 @@
 #include <string.h>
 #include "computerMessage_m.h"
 #include <omnetpp.h>
+#include "MessageType.h"
 
 class Cloud: public omnetpp::cSimpleModule {
 public:
@@ -32,6 +33,7 @@ public:
 private:
 
     omnetpp::simtime_t timeout;         // timeout
+    int lastSeq = 0;
     virtual ComputerMessage *generateNewMessage(char* str);
     void sendMessage(ComputerMessage* msg, int dest);
     void resendLastMessage();

@@ -76,7 +76,7 @@ void Host::handleMessage(omnetpp::cMessage *msg){
                   cancelEvent(timeoutEvent);
                   break;
               }
-              case 3:
+              case MSG_CLOUD_RDY:
               {
                   char str[50] = "Where is the book i am looking for?";
                   message = generateNewMessage(str);
@@ -92,7 +92,7 @@ void Host::handleMessage(omnetpp::cMessage *msg){
                   message = generateNewMessage(str);
                   message->setSeq(message->getSeq()+1);
                   message->setSource(2);
-                  message->setType(5);
+                  message->setType(MSG_BOOK_PAY);
                   sendMessage(message, 1);
                   break;
               }
@@ -120,9 +120,9 @@ void Host::ackMessage(ComputerMessage* msg){
 
     int source = msg->getSource();
     if (source == 1){
-        char str[40] = "ACK from Host to Computer";
+        sprintf(str, "ACK from Host to Computer");
     } else {
-        char str[40] = "ACK from Host to Computer";
+        sprintf(str, "ACK from Host to Cloud");
     }
     ComputerMessage *ack = generateNewMessage(str);
     ack->setType(0);

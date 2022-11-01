@@ -176,24 +176,24 @@ ComputerMessage& ComputerMessage::operator=(const ComputerMessage& other)
 void ComputerMessage::copy(const ComputerMessage& other)
 {
     this->seq = other.seq;
-    this->globalSeq = other.globalSeq;
     this->type = other.type;
+    this->source = other.source;
 }
 
 void ComputerMessage::parsimPack(omnetpp::cCommBuffer *b) const
 {
     ::omnetpp::cMessage::parsimPack(b);
     doParsimPacking(b,this->seq);
-    doParsimPacking(b,this->globalSeq);
     doParsimPacking(b,this->type);
+    doParsimPacking(b,this->source);
 }
 
 void ComputerMessage::parsimUnpack(omnetpp::cCommBuffer *b)
 {
     ::omnetpp::cMessage::parsimUnpack(b);
     doParsimUnpacking(b,this->seq);
-    doParsimUnpacking(b,this->globalSeq);
     doParsimUnpacking(b,this->type);
+    doParsimUnpacking(b,this->source);
 }
 
 int ComputerMessage::getSeq() const
@@ -206,16 +206,6 @@ void ComputerMessage::setSeq(int seq)
     this->seq = seq;
 }
 
-int ComputerMessage::getGlobalSeq() const
-{
-    return this->globalSeq;
-}
-
-void ComputerMessage::setGlobalSeq(int globalSeq)
-{
-    this->globalSeq = globalSeq;
-}
-
 int ComputerMessage::getType() const
 {
     return this->type;
@@ -226,14 +216,24 @@ void ComputerMessage::setType(int type)
     this->type = type;
 }
 
+int ComputerMessage::getSource() const
+{
+    return this->source;
+}
+
+void ComputerMessage::setSource(int source)
+{
+    this->source = source;
+}
+
 class ComputerMessageDescriptor : public omnetpp::cClassDescriptor
 {
   private:
     mutable const char **propertyNames;
     enum FieldConstants {
         FIELD_seq,
-        FIELD_globalSeq,
         FIELD_type,
+        FIELD_source,
     };
   public:
     ComputerMessageDescriptor();
@@ -313,8 +313,8 @@ unsigned int ComputerMessageDescriptor::getFieldTypeFlags(int field) const
     }
     static unsigned int fieldTypeFlags[] = {
         FD_ISEDITABLE,    // FIELD_seq
-        FD_ISEDITABLE,    // FIELD_globalSeq
         FD_ISEDITABLE,    // FIELD_type
+        FD_ISEDITABLE,    // FIELD_source
     };
     return (field >= 0 && field < 3) ? fieldTypeFlags[field] : 0;
 }
@@ -329,8 +329,8 @@ const char *ComputerMessageDescriptor::getFieldName(int field) const
     }
     static const char *fieldNames[] = {
         "seq",
-        "globalSeq",
         "type",
+        "source",
     };
     return (field >= 0 && field < 3) ? fieldNames[field] : nullptr;
 }
@@ -340,8 +340,8 @@ int ComputerMessageDescriptor::findField(const char *fieldName) const
     omnetpp::cClassDescriptor *base = getBaseClassDescriptor();
     int baseIndex = base ? base->getFieldCount() : 0;
     if (strcmp(fieldName, "seq") == 0) return baseIndex + 0;
-    if (strcmp(fieldName, "globalSeq") == 0) return baseIndex + 1;
-    if (strcmp(fieldName, "type") == 0) return baseIndex + 2;
+    if (strcmp(fieldName, "type") == 0) return baseIndex + 1;
+    if (strcmp(fieldName, "source") == 0) return baseIndex + 2;
     return base ? base->findField(fieldName) : -1;
 }
 
@@ -355,8 +355,8 @@ const char *ComputerMessageDescriptor::getFieldTypeString(int field) const
     }
     static const char *fieldTypeStrings[] = {
         "int",    // FIELD_seq
-        "int",    // FIELD_globalSeq
         "int",    // FIELD_type
+        "int",    // FIELD_source
     };
     return (field >= 0 && field < 3) ? fieldTypeStrings[field] : nullptr;
 }
@@ -442,8 +442,8 @@ std::string ComputerMessageDescriptor::getFieldValueAsString(omnetpp::any_ptr ob
     ComputerMessage *pp = omnetpp::fromAnyPtr<ComputerMessage>(object); (void)pp;
     switch (field) {
         case FIELD_seq: return long2string(pp->getSeq());
-        case FIELD_globalSeq: return long2string(pp->getGlobalSeq());
         case FIELD_type: return long2string(pp->getType());
+        case FIELD_source: return long2string(pp->getSource());
         default: return "";
     }
 }
@@ -461,8 +461,8 @@ void ComputerMessageDescriptor::setFieldValueAsString(omnetpp::any_ptr object, i
     ComputerMessage *pp = omnetpp::fromAnyPtr<ComputerMessage>(object); (void)pp;
     switch (field) {
         case FIELD_seq: pp->setSeq(string2long(value)); break;
-        case FIELD_globalSeq: pp->setGlobalSeq(string2long(value)); break;
         case FIELD_type: pp->setType(string2long(value)); break;
+        case FIELD_source: pp->setSource(string2long(value)); break;
         default: throw omnetpp::cRuntimeError("Cannot set field %d of class 'ComputerMessage'", field);
     }
 }
@@ -478,8 +478,8 @@ omnetpp::cValue ComputerMessageDescriptor::getFieldValue(omnetpp::any_ptr object
     ComputerMessage *pp = omnetpp::fromAnyPtr<ComputerMessage>(object); (void)pp;
     switch (field) {
         case FIELD_seq: return pp->getSeq();
-        case FIELD_globalSeq: return pp->getGlobalSeq();
         case FIELD_type: return pp->getType();
+        case FIELD_source: return pp->getSource();
         default: throw omnetpp::cRuntimeError("Cannot return field %d of class 'ComputerMessage' as cValue -- field index out of range?", field);
     }
 }
@@ -497,8 +497,8 @@ void ComputerMessageDescriptor::setFieldValue(omnetpp::any_ptr object, int field
     ComputerMessage *pp = omnetpp::fromAnyPtr<ComputerMessage>(object); (void)pp;
     switch (field) {
         case FIELD_seq: pp->setSeq(omnetpp::checked_int_cast<int>(value.intValue())); break;
-        case FIELD_globalSeq: pp->setGlobalSeq(omnetpp::checked_int_cast<int>(value.intValue())); break;
         case FIELD_type: pp->setType(omnetpp::checked_int_cast<int>(value.intValue())); break;
+        case FIELD_source: pp->setSource(omnetpp::checked_int_cast<int>(value.intValue())); break;
         default: throw omnetpp::cRuntimeError("Cannot set field %d of class 'ComputerMessage'", field);
     }
 }
