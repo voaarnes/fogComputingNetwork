@@ -24,19 +24,24 @@
 class Host: public omnetpp::cSimpleModule {
 private:
     omnetpp::simtime_t timeout;         // timeout
-    omnetpp::cMessage *timeoutEvent;    // holds pointer to the timeout self-message
+    omnetpp::cMessage *timeoutMsg;    // holds pointer to the timeout self-message
     ComputerMessage *message;  // message that has to be re-sent on timeout
 public:
     Host();
     virtual ~Host();
     virtual void initialize() override;
-    virtual ComputerMessage *generateNewMessage(char* str, int seq);
+    virtual ComputerMessage *generateNewMessage(char* str);
     virtual void sendMessage(ComputerMessage *msg, int dest);
     virtual void handleMessage(omnetpp::cMessage *msg) override;
-
+    virtual void resendLastMessage();
 private:
     void ackMessage(ComputerMessage* msg);
+    ComputerMessage *lastMsg = NULL;
+    bool lastAcked;
     int lastDest;
+    int lastSeq = 0;
+
+    int msgLost = 0;
 };
 Define_Module(Host);
 #endif /* HOST_H_ */

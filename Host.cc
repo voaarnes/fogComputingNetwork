@@ -22,94 +22,119 @@ Host::Host() {
 
 Host::~Host() {
     // TODO Auto-generated destructor stub
+    cancelEvent(timeoutMsg);
+    delete timeoutMsg;
 }
 
 
 void Host::initialize(){
     timeout = 1.0;
-    timeoutEvent = new omnetpp::cMessage("timeoutEvent");
+    timeoutMsg = new omnetpp::cMessage("timeoutMsg");
 
 }
 
 
-ComputerMessage *Host::generateNewMessage(char* str, int seq){
-    char msgname[40];
-    sprintf(msgname, "%d-%s", 4, str);
+ComputerMessage *Host::generateNewMessage(char* str){
+    char msgname[20];
+    lastSeq++;
+    sprintf(msgname, "%d-%s", lastSeq, str);
     ComputerMessage *msg = new ComputerMessage(msgname);
+    msg->setSeq(lastSeq);
+    msg->setSource(2);
     return msg;
 }
 
-void Host::sendMessage(ComputerMessage *msg, int dest){
-    ComputerMessage *copy = (ComputerMessage *)msg->dup();
-
-    if(dest == 0){
-        send(copy, "cloudgate$o");
-    }else{
-        send(copy, "foggate$o");
+void Host::sendMessage(ComputerMessage* msg, int dest){
+    if (lastMsg != NULL){
+        delete lastMsg;
     }
-    lastDest = dest;
-    scheduleAt(omnetpp::simTime()+timeout, timeoutEvent);
 
+    lastMsg = msg;
+    ComputerMessage *toSend = msg->dup();
+    lastDest = dest;
+    lastAcked = false;
+    if (dest == 2){
+        EV << "This should not happen";
+    } else if (dest == 1){
+        send(toSend, "foggate$o");
+    } else {
+        send(toSend, "cloudgate$o");
+    }
+    scheduleAt(omnetpp::simTime()+1, timeoutMsg);
 }
+
 
 
 
 void Host::handleMessage(omnetpp::cMessage *msg){
 
-        EV << "Host received msg";
-        if(msg == timeoutEvent){
-            EV << "RESEND MESSAGE\n";
-            sendMessage(message, 0);
+        if(msg == timeoutMsg){
+            resendLastMessage();
+            delete msg;
+            return;
         }
         else {
 
-            ComputerMessage *cmmsg = omnetpp::check_and_cast<ComputerMessage *>(msg);
 
+            if (msgLost < 3){
+                msgLost++;
+                bubble("Message lost");
+                delete msg;
+                return;
+            }
+            ComputerMessage *cmmsg = omnetpp::check_and_cast<ComputerMessage *>(msg);
             if(cmmsg->getType() != 0){
+                EV << "ACKKS";
                 ackMessage(cmmsg);
             }
+            int type = cmmsg->getType();
+            delete cmmsg;
 
-
-            switch(cmmsg->getType()) {
+            switch(type) {
               case 0:
               {
                   EV << "ACK received";
-                  cancelEvent(timeoutEvent);
+                  cancelEvent(timeoutMsg);
                   break;
               }
               case MSG_CLOUD_RDY:
               {
-                  EV << "Book request";
+
+                  bubble("Ready to start");
                   char str[50] = "Where is the book i am looking for?";
-                  message = generateNewMessage(str, cmmsg->getSeq());
-                  message->setSeq(cmmsg->getSeq()+1);
-                  message->setSource(2);
-                  message->setType(3);
+                  message = generateNewMessage(str);
+                  message->setType(MSG_WHEREIS);
                   sendMessage(message, 0);
+                  return;
                   break;
               }
-              case 4:{
+              case MSG_FOUND_LEFT:{
                   EV << "To be animated.";
+                  bubble("Book is left");
+
                   char str[20] = "Pay the book.";
-                  message = generateNewMessage(str, cmmsg->getSeq());
-                  message->setSeq(cmmsg->getSeq()+1);
-                  message->setSource(2);
+                  message = generateNewMessage(str);
                   message->setType(MSG_BOOK_PAY);
                   sendMessage(message, 1);
                   break;
               }
-              case 5:
-              {
-                  EV << "To be animated, walking out.";
-              }
+              case MSG_FOUND_RIGHT:{
+                   EV << "To be animated.";
+                   bubble("Book is RIGHT");
+
+                   char str[20] = "Pay the book.";
+                   message = generateNewMessage(str);
+                   message->setType(MSG_BOOK_PAY);
+                   sendMessage(message, 1);
+                   break;
+               }
               default:
               {
                 EV << "No coded response pepehands.";
               }
             }
-
-
         }
+
 
 }
 
@@ -117,17 +142,17 @@ void Host::handleMessage(omnetpp::cMessage *msg){
 
 
 void Host::ackMessage(ComputerMessage* msg){
-
-    char str[40] = "ACK from host to y";
-
+    lastSeq = msg->getSeq();
+    ComputerMessage *ack;
     int source = msg->getSource();
-    if (source == 1){
-        sprintf(str, "ACK from Host to Computer");
+    char msgText[25];
+    if (source == 2){
+        sprintf(msgText, "ACK from Host to Computer");
     } else {
-        sprintf(str, "ACK from Host to Cloud");
+        sprintf(msgText, "ACK from Host to Cloud");
     }
-    ComputerMessage *ack = generateNewMessage(str, msg->getSeq());
-    ack->setType(0);
+    ack = generateNewMessage(msgText);
+    ack->setType(MSG_ACK);
     ack->setSource(2);
     if (source == 2){
        EV << "This should not happen";
@@ -137,4 +162,18 @@ void Host::ackMessage(ComputerMessage* msg){
        send(ack, "cloudgate$o");
    }
 
+}
+
+
+void Host::resendLastMessage(){
+    ComputerMessage *toSend = lastMsg->dup();
+
+    if (lastDest == 2){
+        EV << "This should not happen";
+    } else if (lastDest == 1){
+        send(toSend, "foggate$o");
+    } else {
+        send(toSend, "cloudgate$o");
+    }
+    scheduleAt(omnetpp::simTime()+timeout, timeoutMsg);
 }

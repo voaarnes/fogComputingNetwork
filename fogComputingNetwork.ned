@@ -27,6 +27,7 @@ simple Cloud
 {
     parameters:
         @display("i=misc/cloud");
+        int leftRightSide = default(1);
     gates:
         inout foggate;
         inout hostgate;
@@ -63,6 +64,7 @@ network fogComputingNetwork
         @figure[pillar2](type=rectangle; pos=825,272; size=25,375; fillColor=#000000; lineWidth=1; zIndex=-1);
         @figure[libraryLabel](type=text; pos=380,150; text=library);
         @display("bgb=1353,724");
+
     types:
         channel Channel extends ned.DelayChannel
         {
@@ -70,6 +72,7 @@ network fogComputingNetwork
         }
     submodules:
         cloud: Cloud {
+        	
             @display("p=1281,64");
         }
         computer: Computer {

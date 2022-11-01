@@ -31,12 +31,15 @@ public:
     virtual void handleMessage(omnetpp::cMessage *msg) override;
 
 private:
+
     omnetpp::simtime_t timeout;         // timeout
     int lastSeq = 0;
+    int msgLost = 0;
     virtual ComputerMessage *generateNewMessage(char* str);
     void sendMessage(ComputerMessage* msg, int dest);
     void resendLastMessage();
     void ackMessage(ComputerMessage* msg);
+
 };
 
 Define_Module(Cloud);

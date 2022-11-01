@@ -39,8 +39,7 @@ private:
     int lastDest;
     int lastSeq = 0;
 
-
-    omnetpp::simtime_t timeout = 1.0;         // timeout
+    float timeout = 1.0f;
     bool lastAcked = false;
 
 };

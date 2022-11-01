@@ -20,42 +20,35 @@
 
 Computer::Computer() {
     // TODO Auto-generated constructor stub
+    timeout = 1.0;
 
 }
 
 Computer::~Computer() {
     // TODO Auto-generated destructor stub
-    delete timeoutEvent;
+    cancelEvent(timeoutMsg);
+    delete timeoutMsg;
 }
 
 ComputerMessage *Computer::generateNewMessage(char* str){
     char msgname[20];
+    lastSeq++;
     sprintf(msgname, "%d-%s", lastSeq, str);
     ComputerMessage *msg = new ComputerMessage(msgname);
-
+    msg->setSeq(lastSeq);
+    msg->setSource(1);
     return msg;
 }
 
 void Computer::initialize() {
     // Send contents to cloud
-    //timeoutEvent = new ComputerMessage("timeout");
+    timeoutMsg = new ComputerMessage("timeout");
 
-    timeoutEvent = new omnetpp::cMessage("timeoutEvent");
-
-    char str[40] = "1-Contents of Book Table";
-    ComputerMessage *message = new ComputerMessage(str); // Creating placeholder message for access to variables in generate.
-    message->setSeq(1);
-    message->setSource(1);
-    message->setType(1);
-    sendMessage(message, 0);
 
     // Send contents
 
     char str[20] = "Book contents";
     ComputerMessage *message = generateNewMessage(str); // Creating placeholder message for access to variables in generate.
-    message->setSeq(1);
-    message->setSource(1);
-
     message->setType(MSG_CONTENTS);
     sendMessage(message, 0);
 
@@ -63,9 +56,10 @@ void Computer::initialize() {
 
 }
 void Computer::handleMessage(omnetpp::cMessage *msg) {
-    if (msg == timeoutEvent){
+    if (msg == timeoutMsg){
            // REsend last
            resendLastMessage();
+           return;
        }
 
        ComputerMessage *cMsg = dynamic_cast<ComputerMessage *>(msg);
@@ -75,25 +69,29 @@ void Computer::handleMessage(omnetpp::cMessage *msg) {
            if (cMsg->getType() != 0){
                EV << "ACKING";
                ackMessage(cMsg);
-               lastSeq = cMsg->getSeq();
 
            }
-           switch (cMsg->getType()){
+           int type = cMsg->getType();
+           delete cMsg;
+           switch (type){
                case MSG_ACK: {
                    lastAcked = true;
-                   cancelEvent(timeoutEvent);
+                   cancelEvent(timeoutMsg);
                    break;
                }
                case MSG_BOOK_PAY: {
                    EV << "Host pay\n";
                    // Send paid
                    // Send contents
+                   bubble("Book payed");
+                   char str[20] = "Book payed";
+                  ComputerMessage *message = generateNewMessage(str); // Creating placeholder message for access to variables in generate.
+                  message->setType(MSG_BOOK_PAYED);
+                  sendMessage(message, 2);
 
 
-                   char str[20] = "Book contents";
-                   ComputerMessage *message = generateNewMessage(str); // Creating placeholder message for access to variables in generate.
-                   message->setSeq(1);
-                   message->setSource(1);
+                   char str1[20] = "Book contents";
+                   message = generateNewMessage(str1); // Creating placeholder message for access to variables in generate.
 
                    message->setType(MSG_CONTENTS);
                    sendMessage(message, 0);
@@ -106,7 +104,6 @@ void Computer::handleMessage(omnetpp::cMessage *msg) {
                }
            }
        }
-       delete cMsg;
 
 }
 
@@ -122,25 +119,25 @@ void Computer::sendMessage(ComputerMessage* msg, int dest){
     if (dest == 1){
         EV << "This should not happen";
     } else if (dest == 0){
-        //send(toSend, cloudGate);
-        EV << "TEST\n";
         send(toSend, "cloudgate$o");
     } else {
-        //send(toSend, "hostgate$o");
+        send(toSend, "hostgate$o");
     }
-    scheduleAt(omnetpp::simTime()+timeout, timeoutEvent);
+    scheduleAt(omnetpp::simTime()+timeout, timeoutMsg);
 }
 
 void Computer::ackMessage(ComputerMessage* msg){
+    lastSeq = msg->getSeq();
     ComputerMessage *ack;
     int source = msg->getSource();
+    char msgText[25];
     if (source == 2){
-        ack = new ComputerMessage("ACK from Computer to Host");
+        sprintf(msgText, "ACK from Computer to Host");
     } else {
-        ack = new ComputerMessage("ACK from Computer to Cloud");
+        sprintf(msgText, "ACK from Computer to Cloud");
     }
-
-    ack->setType(0);
+    ack = generateNewMessage(msgText);
+    ack->setType(MSG_ACK);
     ack->setSource(1);
 
     if (source == 1){
@@ -163,5 +160,5 @@ void Computer::resendLastMessage(){
     } else {
         send(toSend, "cloudgate$o");
     }
-    scheduleAt(omnetpp::simTime()+timeout, timeoutEvent);
+    scheduleAt(omnetpp::simTime()+timeout, timeoutMsg);
 }
