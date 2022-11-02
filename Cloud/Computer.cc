@@ -83,6 +83,7 @@ void Computer::handleMessage(omnetpp::cMessage *msg) {
            delete cMsg;
            switch (type){
                case MSG_ACK: {
+
                    if (src == 0){
                        cancelEvent(timeoutCloud);
                        delete lastCloud;

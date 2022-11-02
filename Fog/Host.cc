@@ -33,6 +33,7 @@ void Host::initialize(){
     timeout = 1.0;
     timeoutFog = new ComputerMessage("timeoutFog");
     timeoutCloud = new ComputerMessage("timeoutCloud");
+    payBookDelay = new ComputerMessage("payBook");
 
 }
 
@@ -80,12 +81,18 @@ void Host::handleMessage(omnetpp::cMessage *msg){
                     delete msg;
                     return;
                 }
+        if (msg == payBookDelay){
+            char str[20] = "Pay the book.";
+            message = generateNewMessage(str);
+            message->setType(MSG_BOOK_PAY);
+            sendMessage(message, 1);
+        }
         else {
 
 
             if (msgLost < 3){
                 msgLost++;
-                bubble("Message lost");
+                getParentModule()->bubble("Message lost");
                 delete msg;
                 return;
             }
@@ -114,7 +121,7 @@ void Host::handleMessage(omnetpp::cMessage *msg){
               case MSG_CLOUD_RDY:
               {
 
-                  bubble("Ready to start");
+                  getParentModule()->bubble("Ready to start");
                   char str[50] = "Where is the book i am looking for?";
                   message = generateNewMessage(str);
                   message->setType(MSG_WHEREIS);
@@ -123,23 +130,13 @@ void Host::handleMessage(omnetpp::cMessage *msg){
                   break;
               }
               case MSG_FOUND_LEFT:{
-                  EV << "To be animated.";
-                  bubble("Book is left");
-
-                  char str[20] = "Pay the book.";
-                  message = generateNewMessage(str);
-                  message->setType(MSG_BOOK_PAY);
-                  sendMessage(message, 1);
+                  getParentModule()->bubble("Book is left");
+                  scheduleAt(33.0, payBookDelay);
                   break;
               }
               case MSG_FOUND_RIGHT:{
-                   EV << "To be animated.";
-                   bubble("Book is RIGHT");
-
-                   char str[20] = "Pay the book.";
-                   message = generateNewMessage(str);
-                   message->setType(MSG_BOOK_PAY);
-                   sendMessage(message, 1);
+                  getParentModule()->bubble("Book is right");
+                   scheduleAt(33.0, payBookDelay);
                    break;
                }
               default:

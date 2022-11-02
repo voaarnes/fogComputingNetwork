@@ -41,6 +41,7 @@ private:
     ComputerMessage * timeoutCloud;
     ComputerMessage *lastFog = NULL;
     ComputerMessage *lastCloud = NULL;
+    ComputerMessage *payBookDelay = NULL;
     int lastSeq = 0;
 
     int msgLost = 0;

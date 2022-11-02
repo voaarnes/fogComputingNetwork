@@ -14,6 +14,10 @@
 //
 
 
+import inet.node.inet.StandardHost;
+import inet.visualizer.common.IntegratedVisualizer;
+
+
 
 
 simple Visualizer
@@ -44,13 +48,25 @@ simple Computer
         inout cloudgate;
 }
 
-simple Host
+simple Host 
 {
     parameters:
         @display("i=device/pocketpc");
     gates:
         inout foggate;
         inout cloudgate;
+}
+
+module HostShell extends StandardHost
+{
+	gates:
+		inout foggate;
+        inout cloudgate;
+	submodules:
+		host: Host;
+	connections allowunconnected:
+		foggate <--> host.foggate;
+		cloudgate <--> host.cloudgate;
 }
 
 
@@ -82,19 +98,20 @@ network fogComputingNetwork
     submodules:
         cloud: Cloud {
         	
-            @display("p=1281,64");
+            @display("p=1281,64;r=700");
         }
         computer: Computer {
-            @display("p=725,350");
+            @display("p=725,350;r=250");
         }
-        host: Host {
-            @display("p=725,610");
+        host: HostShell {
+            @display("p=725,610;r=200");
         }
-        visualizer: Visualizer {
+        
+        visualizer: IntegratedVisualizer {
             @display("p=1281,166");
         }
         
-    connections:
+    connections allowunconnected:
         cloud.foggate <--> Channel2 <--> computer.cloudgate;
         cloud.hostgate <--> Channel3 <--> host.cloudgate;
 		computer.hostgate <--> Channel <--> host.foggate;

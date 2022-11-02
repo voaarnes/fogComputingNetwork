@@ -91,6 +91,7 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
                // Left or right
                EV << "Received request for book\n";
 
+
                int side = par("leftRightSide").intValue();
                if (side == 0){
                    ComputerMessage* newMsg = generateNewMessage("Book is left");
