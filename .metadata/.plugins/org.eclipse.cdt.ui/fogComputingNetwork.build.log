@@ -1,7 +1,0 @@
-12:02:13 **** Incremental Build of configuration release for project fogComputingNetwork ****
-make MODE=release all 
-Host.cc
-Creating executable: out/gcc-release//fogComputingNetwork
-
-12:02:16 Build Finished. 0 errors, 0 warnings. (took 3s.239ms)
-
