@@ -27,7 +27,7 @@ public:
     virtual ~Computer();
     virtual void initialize() override;
     virtual void handleMessage(omnetpp::cMessage *msg) override;
-
+    virtual void refreshDisplay() const override;
 private:
     void sendMessage(ComputerMessage* msg, int dest);
     void resendLastMessage(int dest);
@@ -43,6 +43,9 @@ private:
 
     float timeout = 1.0f;
     bool lastAcked = false;
+
+    long msgSent;
+    long msgReceived;
 
 };
 Define_Module(Computer);

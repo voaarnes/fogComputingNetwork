@@ -35,6 +35,7 @@ public:
     virtual void sendMessage(ComputerMessage *msg, int dest);
     virtual void handleMessage(omnetpp::cMessage *msg) override;
     virtual void resendLastMessage(int dest);
+    virtual void refreshDisplay() const override;
 private:
     void ackMessage(ComputerMessage* msg);
     ComputerMessage * timeoutFog;
@@ -43,8 +44,9 @@ private:
     ComputerMessage *lastFog = NULL;
     ComputerMessage *lastCloud = NULL;
     int lastSeq = 0;
-
     int msgLost = 0;
+    long msgSent;
+    long msgReceived;
 };
 Define_Module(Host);
 #endif /* HOST_H_ */

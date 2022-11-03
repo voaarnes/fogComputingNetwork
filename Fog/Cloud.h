@@ -29,6 +29,7 @@ public:
     virtual void initialize() override;
     virtual ~Cloud();
     virtual void handleMessage(omnetpp::cMessage *msg) override;
+    virtual void refreshDisplay() const override;
 
 private:
 
@@ -43,6 +44,8 @@ private:
     ComputerMessage * timeoutHost;
     ComputerMessage *lastFog = NULL;
     ComputerMessage *lastHost = NULL;
+    long msgSent;
+    long msgReceived;
 
 };
 

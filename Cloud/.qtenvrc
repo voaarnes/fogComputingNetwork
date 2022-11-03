@@ -1,0 +1,15 @@
+[General]
+last-configname=RightSide
+last-runnumber=0
+
+[RunModeProfiles]
+fast-max-animation-speed=nan
+fast-max-playback-speed=1e+06
+fast-min-animation-speed=nan
+fast-min-playback-speed=1
+fast-playback-speed=1000
+run-max-animation-speed=0.5
+run-max-playback-speed=100
+run-min-animation-speed=0.5
+run-min-playback-speed=0.01
+run-playback-speed=0.5011872336272722

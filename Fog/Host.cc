@@ -34,12 +34,16 @@ void Host::initialize(){
     timeoutFog = new ComputerMessage("timeoutFog");
     timeoutCloud = new ComputerMessage("timeoutCloud");
     payBookDelay = new ComputerMessage("payBook");
+    msgSent = 0;
+    msgReceived = 0;
 
+    WATCH(msgSent);
+    WATCH(msgReceived);
 }
 
 
 ComputerMessage *Host::generateNewMessage(char* str){
-    char msgname[20];
+    char msgname[40];
     lastSeq++;
     sprintf(msgname, "%d-%s", lastSeq, str);
     ComputerMessage *msg = new ComputerMessage(msgname);
@@ -50,6 +54,7 @@ ComputerMessage *Host::generateNewMessage(char* str){
 
 void Host::sendMessage(ComputerMessage* msg, int dest){
 
+    msgSent++;
     ComputerMessage *toSend = msg->dup();
 
     if (dest == 2){
@@ -80,7 +85,7 @@ void Host::handleMessage(omnetpp::cMessage *msg){
                     resendLastMessage(1);
                     delete msg;
                     return;
-                }
+        }
         if (msg == payBookDelay){
             char str[20] = "Pay the book.";
             message = generateNewMessage(str);
@@ -96,6 +101,8 @@ void Host::handleMessage(omnetpp::cMessage *msg){
                 delete msg;
                 return;
             }
+
+            msgReceived++;
             ComputerMessage *cmmsg = omnetpp::check_and_cast<ComputerMessage *>(msg);
             if(cmmsg->getType() != 0){
                 ackMessage(cmmsg);
@@ -153,10 +160,11 @@ void Host::handleMessage(omnetpp::cMessage *msg){
 
 
 void Host::ackMessage(ComputerMessage* msg){
+    msgSent++;
     lastSeq = msg->getSeq();
     ComputerMessage *ack;
     int source = msg->getSource();
-    char msgText[25];
+    char msgText[30];
     if (source == 2){
         sprintf(msgText, "ACK from Host to Computer");
     } else {
@@ -178,6 +186,7 @@ void Host::ackMessage(ComputerMessage* msg){
 
 void Host::resendLastMessage(int dest){
 
+    msgSent++;
 
     if (dest == 2){
         EV << "This should not happen";
@@ -192,4 +201,10 @@ void Host::resendLastMessage(int dest){
         scheduleAt(omnetpp::simTime()+timeout, timeoutCloud);
     }
 
+}
+
+void Host::refreshDisplay() const{
+    char buffer[40];
+    sprintf(buffer, "sent: %ld rcvd: %ld lost: %i", msgSent, msgReceived, msgLost);
+    getParentModule()->getDisplayString().setTagArg("t", 0, buffer);
 }

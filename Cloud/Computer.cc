@@ -47,13 +47,17 @@ void Computer::initialize() {
     timeoutHost = new ComputerMessage("timeoutHost");
     timeoutCloud = new ComputerMessage("timeoutCloud");
 
+    msgSent = 0;
+    msgReceived = 0;
+
+    WATCH(msgSent);
+    WATCH(msgReceived);
     // Send contents
 
     char str[20] = "Book contents";
     ComputerMessage *message = generateNewMessage(str); // Creating placeholder message for access to variables in generate.
     message->setType(MSG_CONTENTS);
     sendMessage(message, 0);
-
 
 
 }
@@ -68,7 +72,7 @@ void Computer::handleMessage(omnetpp::cMessage *msg) {
                resendLastMessage(0);
                return;
            }
-
+    msgReceived++;
        ComputerMessage *cMsg = dynamic_cast<ComputerMessage *>(msg);
        if (cMsg != NULL){
 
@@ -123,7 +127,7 @@ void Computer::handleMessage(omnetpp::cMessage *msg) {
 }
 
 void Computer::sendMessage(ComputerMessage* msg, int dest){
-
+    msgSent++;
     ComputerMessage *toSend = msg->dup();
 
     if (dest == 1){
@@ -144,6 +148,7 @@ void Computer::sendMessage(ComputerMessage* msg, int dest){
 }
 
 void Computer::ackMessage(ComputerMessage* msg){
+    msgSent++;
     lastSeq = msg->getSeq();
     ComputerMessage *ack;
     int source = msg->getSource();
@@ -168,8 +173,6 @@ void Computer::ackMessage(ComputerMessage* msg){
 
 
 void Computer::resendLastMessage(int dest){
-
-
     if (dest == 1){
         EV << "This should not happen";
     } else if (dest == 2){
@@ -183,4 +186,10 @@ void Computer::resendLastMessage(int dest){
         scheduleAt(omnetpp::simTime()+timeout, timeoutCloud);
     }
 
+}
+
+void Computer::refreshDisplay() const{
+    char buffer[20];
+    sprintf(buffer, "sent: %ld rcvd: %ld", msgSent, msgReceived);
+    getDisplayString().setTagArg("t", 0, buffer);
 }

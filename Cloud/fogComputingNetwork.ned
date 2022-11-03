@@ -15,7 +15,7 @@
 
 
 import inet.node.inet.StandardHost;
-import inet.visualizer.common.IntegratedVisualizer;
+import inet.visualizer.integrated.IntegratedVisualizer;
 
 
 

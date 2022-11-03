@@ -31,11 +31,16 @@ void Cloud::initialize() {
     timeoutHost = new ComputerMessage("timeoutHost");
     timeoutFog = new ComputerMessage("timeoutFog");
 
+    msgSent = 0;
+    msgReceived = 0;
+
+    WATCH(msgSent);
+    WATCH(msgReceived);
 }
 
 
 ComputerMessage *Cloud::generateNewMessage(char* str){
-    char msgname[20];
+    char msgname[60];
     lastSeq++;
     sprintf(msgname, "%d-%s", lastSeq, str);
     ComputerMessage *msg = new ComputerMessage(msgname);
@@ -54,7 +59,7 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
           resendLastMessage(1);
           return;
   }
-
+   msgReceived++;
    ComputerMessage *cMsg = dynamic_cast<ComputerMessage *>(msg);
    if (cMsg != NULL){
        if (cMsg->getType() != 0){
@@ -78,7 +83,8 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
            case MSG_CONTENTS: {
                EV << "Received contents\n";
                if (!isStarted) {
-                  ComputerMessage* newMsg = generateNewMessage("Cloud ready to start");
+                  char str[40] = "Cloud ready to start";
+                  ComputerMessage* newMsg = generateNewMessage(str);
                   newMsg->setType(MSG_CLOUD_RDY);
                   sendMessage(newMsg, 2);
                   isStarted = true;
@@ -94,11 +100,13 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
 
                int side = par("leftRightSide").intValue();
                if (side == 0){
-                   ComputerMessage* newMsg = generateNewMessage("Book is left");
+                   char str[40] = "Book is LEFT";
+                   ComputerMessage* newMsg = generateNewMessage(str);
                   newMsg->setType(MSG_FOUND_LEFT);
                   sendMessage(newMsg, 2);
                } else {
-                   ComputerMessage* newMsg = generateNewMessage("Book is RIGHT");
+                   char str[40] = "Book is RIGHT";
+                   ComputerMessage* newMsg = generateNewMessage(str);
                   newMsg->setType(MSG_FOUND_RIGHT);
                   sendMessage(newMsg, 2);
                }
@@ -119,11 +127,12 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
 }
 
 void Cloud::ackMessage(ComputerMessage* msg){
+    msgSent++;
     lastSeq = msg->getSeq();
     EV << "Last: " << lastSeq;
     ComputerMessage *ack;
     int source = msg->getSource();
-    char msgText[25];
+    char msgText[30];
     if (source == 2){
         sprintf(msgText, "ACK from Cloud to Host");
     } else {
@@ -144,7 +153,7 @@ void Cloud::ackMessage(ComputerMessage* msg){
 }
 
 void Cloud::resendLastMessage(int dest){
-
+    msgSent++;
     if (dest == 0){
         EV << "This should not happen";
     } else if (dest == 1){
@@ -162,6 +171,7 @@ void Cloud::resendLastMessage(int dest){
 
 
 void Cloud::sendMessage(ComputerMessage* msg, int dest){
+    msgSent++;
     ComputerMessage *toSend = msg->dup();
 
     if (dest == 0){
@@ -190,3 +200,8 @@ Cloud::~Cloud() {
     delete timeoutHost;
 }
 
+void Cloud::refreshDisplay() const{
+    char buffer[20];
+    sprintf(buffer, "sent: %ld rcvd: %ld", msgSent, msgReceived);
+    getDisplayString().setTagArg("t", 0, buffer);
+}
