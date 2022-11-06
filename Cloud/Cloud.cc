@@ -31,11 +31,15 @@ void Cloud::initialize() {
     timeoutHost = new ComputerMessage("timeoutHost");
     timeoutFog = new ComputerMessage("timeoutFog");
 
-    msgSent = 0;
-    msgReceived = 0;
+    msgSentHost = 0;
+    msgSentComputer = 0;
+    msgReceivedHost = 0;
+    msgReceivedComputer = 0;
 
-    WATCH(msgSent);
-    WATCH(msgReceived);
+    WATCH(msgSentHost);
+    WATCH(msgSentComputer);
+    WATCH(msgReceivedHost);
+    WATCH(msgReceivedComputer);
 }
 
 
@@ -59,15 +63,20 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
           resendLastMessage(1);
           return;
   }
-   msgReceived++;
    ComputerMessage *cMsg = dynamic_cast<ComputerMessage *>(msg);
+
    if (cMsg != NULL){
+
+       if(cMsg->getSource() == 1) {msgReceivedComputer++;}
+       else {msgReceivedHost++;}
+
        if (cMsg->getType() != 0){
            ackMessage(cMsg);
        }
 
        int type = cMsg->getType();
        int src = cMsg->getSource();
+
        delete cMsg;
        switch (type){
            case 0: {
@@ -127,7 +136,6 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
 }
 
 void Cloud::ackMessage(ComputerMessage* msg){
-    msgSent++;
     lastSeq = msg->getSeq();
     EV << "Last: " << lastSeq;
     ComputerMessage *ack;
@@ -145,24 +153,27 @@ void Cloud::ackMessage(ComputerMessage* msg){
     if (source == 0){
        EV << "This should not happen";
    } else if (source == 1){
+       msgSentComputer++;
        send(ack, "foggate$o");
    } else {
+       msgSentHost++;
        send(ack, "hostgate$o");
    }
 
 }
 
 void Cloud::resendLastMessage(int dest){
-    msgSent++;
     if (dest == 0){
         EV << "This should not happen";
     } else if (dest == 1){
         ComputerMessage *toSend = lastFog->dup();
+        msgSentComputer++;
         send(toSend, "foggate$o");
         scheduleAt(omnetpp::simTime()+timeout, timeoutFog);
 
     } else {
         ComputerMessage *toSend = lastHost->dup();
+        msgSentHost++;
         send(toSend, "hostgate$o");
         scheduleAt(omnetpp::simTime()+timeout, timeoutHost);
     }
@@ -171,17 +182,18 @@ void Cloud::resendLastMessage(int dest){
 
 
 void Cloud::sendMessage(ComputerMessage* msg, int dest){
-    msgSent++;
     ComputerMessage *toSend = msg->dup();
 
     if (dest == 0){
         EV << "This should not happen";
     } else if (dest == 1){
+        msgSentComputer++;
         send(toSend, "foggate$o");
 
         lastFog = msg;
         scheduleAt(omnetpp::simTime()+timeout, timeoutFog);
     } else {
+        msgSentHost++;
         send(toSend, "hostgate$o");
 
 
@@ -202,6 +214,59 @@ Cloud::~Cloud() {
 
 void Cloud::refreshDisplay() const{
     char buffer[20];
-    sprintf(buffer, "sent: %ld rcvd: %ld", msgSent, msgReceived);
+    sprintf(buffer, "sent: %ld rcvd: %ld", msgSentComputer+msgSentHost, msgReceivedComputer+msgReceivedHost);
     getDisplayString().setTagArg("t", 0, buffer);
+
+    char label[60];
+
+    // Change total sent/received cloud
+    sprintf(label, "Total number of messages sent/received by the cloud: %ld", msgSentComputer+msgSentHost+msgReceivedComputer+msgReceivedHost);
+    omnetpp::cCanvas *canvas = getParentModule()->getCanvas();
+    omnetpp::cTextFigure *textFigure = omnetpp::check_and_cast<omnetpp::cTextFigure*>(canvas->getFigure("cloudsr"));
+    textFigure->setText(label);
+
+
+    // Change power spent sending.
+    sprintf(label, "Cloud (from cloud to smartphone): %ld", msgSentHost*S_POWER_CLOUD_TO_HOST);
+    textFigure = omnetpp::check_and_cast<omnetpp::cTextFigure*>(canvas->getFigure("powerspentsendcls"));
+    textFigure->setText(label);
+
+    sprintf(label, "Cloud (from cloud to computer): %ld", msgSentComputer*S_POWER_CLOUD_TO_FOG);
+    textFigure = omnetpp::check_and_cast<omnetpp::cTextFigure*>(canvas->getFigure("powerspentsendclc"));
+    textFigure->setText(label);
+
+    /////////////////////////////////////
+
+    // Change power spent receiving.
+    sprintf(label, "Cloud (cloud from smartphone): %ld", msgReceivedHost*R_POWER_HOST_TO_CLOUD);
+    textFigure = omnetpp::check_and_cast<omnetpp::cTextFigure*>(canvas->getFigure("powerspentreceivecls"));
+    textFigure->setText(label);
+
+    sprintf(label, "Cloud (cloud from computer): %ld", msgReceivedComputer*R_POWER_FOG_TO_CLOUD);
+    textFigure = omnetpp::check_and_cast<omnetpp::cTextFigure*>(canvas->getFigure("powerspentreceiveclc"));
+    textFigure->setText(label);
+
+    /////////////////////////////////////
+
+    // Change total sending delay..
+    sprintf(label, "Cloud (from cloud to smartphone): %ld", msgSentHost*S_DELAY_CLOUD_TO_HOST);
+    textFigure = omnetpp::check_and_cast<omnetpp::cTextFigure*>(canvas->getFigure("delaysendcls"));
+    textFigure->setText(label);
+
+
+    sprintf(label, "Cloud (from cloud to computer): %ld", msgSentComputer*S_DELAY_CLOUD_TO_FOG);
+    textFigure = omnetpp::check_and_cast<omnetpp::cTextFigure*>(canvas->getFigure("delaysendclc"));
+    textFigure->setText(label);
+
+    /////////////////////////////////////
+
+    // Change total receiving delay.
+    sprintf(label, "Cloud (cloud from smartphone): %ld", msgReceivedHost*R_DELAY_HOST_TO_CLOUD);
+    textFigure = omnetpp::check_and_cast<omnetpp::cTextFigure*>(canvas->getFigure("delayreceivecls"));
+    textFigure->setText(label);
+
+    sprintf(label, "Cloud (cloud from computer): %ld", msgReceivedComputer*R_DELAY_FOG_TO_CLOUD);
+    textFigure = omnetpp::check_and_cast<omnetpp::cTextFigure*>(canvas->getFigure("delayreceiveclc"));
+    textFigure->setText(label);
+
 }
