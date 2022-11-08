@@ -49,7 +49,7 @@ void Host::initialize(){
 
 
 ComputerMessage *Host::generateNewMessage(char* str){
-    char msgname[50];
+    char msgname[60];
     lastSeq++;
     sprintf(msgname, "%d-%s", lastSeq, str);
     ComputerMessage *msg = new ComputerMessage(msgname);
@@ -65,12 +65,12 @@ void Host::sendMessage(ComputerMessage* msg, int dest){
         EV << "This should not happen";
     } else if (dest == 0){
         msgSentCloud++;
-        send(toSend, "cloudgate$o");
+        send(toSend, "cloudout");
         lastCloud = msg;
         scheduleAt(omnetpp::simTime()+timeout, timeoutCloud);
     } else {
         msgSentComputer++;
-        send(toSend, "foggate$o");
+        send(toSend, "fogout");
         lastFog = msg;
         scheduleAt(omnetpp::simTime()+timeout, timeoutFog);
     }
@@ -97,7 +97,7 @@ void Host::handleMessage(omnetpp::cMessage *msg){
                     char str[20] = "Pay the book.";
                     message = generateNewMessage(str);
                     message->setType(MSG_BOOK_PAY);
-                    sendMessage(message, 0);
+                    sendMessage(message, 1);
                 }
         else {
 
@@ -174,7 +174,7 @@ void Host::ackMessage(ComputerMessage* msg){
     lastSeq = msg->getSeq();
     ComputerMessage *ack;
     int source = msg->getSource();
-    char msgText[30];
+    char msgText[40];
     if (source == 2){
         sprintf(msgText, "ACK from Host to Computer");
     } else {
@@ -187,10 +187,10 @@ void Host::ackMessage(ComputerMessage* msg){
        EV << "This should not happen";
    } else if (source == 1){
        msgSentComputer++;
-       send(ack, "foggate$o");
+       send(ack, "fogout");
    } else {
        msgSentCloud++;
-       send(ack, "cloudgate$o");
+       send(ack, "cloudout");
    }
 
 }
@@ -204,13 +204,13 @@ void Host::resendLastMessage(int dest){
     } else if (dest == 1){
         msgSentComputer++;
         ComputerMessage *toSend = lastFog->dup();
-        send(toSend, "foggate$o");
+        send(toSend, "fogout");
         scheduleAt(omnetpp::simTime()+timeout, timeoutFog);
 
     } else {
         msgSentCloud++;
         ComputerMessage *toSend = lastCloud->dup();
-        send(toSend, "cloudgate$o");
+        send(toSend, "cloudout");
         scheduleAt(omnetpp::simTime()+timeout, timeoutCloud);
     }
 
@@ -221,7 +221,7 @@ void Host::refreshDisplay() const{
     sprintf(buffer, "sent: %ld rcvd: %ld lost: %i", msgSentComputer+msgSentCloud, msgReceivedComputer+msgReceivedCloud, msgLost);
     getParentModule()->getDisplayString().setTagArg("t", 0, buffer);
 
-    char label[60];
+    char label[70];
 
     // Change total sent/received cloud
     sprintf(label, "Total number of messages sent/received by the smartphone: %ld", msgSentCloud+msgSentCloud+msgReceivedComputer+msgReceivedComputer);

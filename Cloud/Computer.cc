@@ -33,7 +33,7 @@ Computer::~Computer() {
 }
 
 ComputerMessage *Computer::generateNewMessage(char* str){
-    char msgname[20];
+    char msgname[40];
     lastSeq++;
     sprintf(msgname, "%d-%s", lastSeq, str);
     ComputerMessage *msg = new ComputerMessage(msgname);
@@ -140,13 +140,13 @@ void Computer::sendMessage(ComputerMessage* msg, int dest){
         EV << "This should not happen";
     } else if (dest == 0){
         msgSentCloud++;
-        send(toSend, "cloudgate$o");
+        send(toSend, "cloudout");
 
         lastCloud = msg;
         scheduleAt(omnetpp::simTime()+timeout, timeoutCloud);
     } else {
         msgSentHost++;
-        send(toSend, "hostgate$o");
+        send(toSend, "hostout");
 
 
         lastHost = msg;
@@ -173,10 +173,10 @@ void Computer::ackMessage(ComputerMessage* msg){
        EV << "This should not happen";
    } else if (source == 2){
        msgSentHost++;
-       send(ack, "hostgate$o");
+       send(ack, "hostout");
    } else {
        msgSentCloud++;
-       send(ack, "cloudgate$o");
+       send(ack, "cloudout");
    }
 }
 
@@ -187,13 +187,13 @@ void Computer::resendLastMessage(int dest){
     } else if (dest == 2){
         msgSentHost++;
         ComputerMessage *toSend = lastHost->dup();
-        send(toSend, "hostgate$o");
+        send(toSend, "hostout");
         scheduleAt(omnetpp::simTime()+timeout, timeoutHost);
 
     } else {
         msgSentCloud++;
         ComputerMessage *toSend = lastCloud->dup();
-        send(toSend, "cloudgate$o");
+        send(toSend, "cloudout");
         scheduleAt(omnetpp::simTime()+timeout, timeoutCloud);
     }
 

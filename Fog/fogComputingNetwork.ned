@@ -27,8 +27,10 @@ simple Cloud
         @display("i=misc/cloud");
         int leftRightSide = default(1);
     gates:
-        inout foggate;
-        inout hostgate;
+        input fogin;
+        input hostin;
+        output fogout;
+        output hostout;
 }
 
 
@@ -38,8 +40,10 @@ simple Computer
         @display("i=device/pc3");
         int leftRightSide = default(1);
     gates:
-        inout hostgate;
-        inout cloudgate;
+        input cloudin;
+        input hostin;
+        output cloudout;
+        output hostout;
 }
 
 simple Host 
@@ -47,20 +51,26 @@ simple Host
     parameters:
         @display("i=device/pocketpc");
     gates:
-        inout foggate;
-        inout cloudgate;
+        input fogin;
+        input cloudin;
+        output fogout;
+        output cloudout;
 }
 
 module HostShell extends StandardHost
 {
 	gates:
-		inout foggate;
-        inout cloudgate;
+        input fogin;
+        input cloudin;
+        output fogout;
+        output cloudout;
 	submodules:
 		host: Host;
 	connections allowunconnected:
-		foggate <--> host.foggate;
-		cloudgate <--> host.cloudgate;
+		fogin --> host.fogin;
+		cloudin --> host.cloudin; 
+		fogout <-- host.fogout;
+		cloudout <-- host.cloudout;
 }
 
 
@@ -115,18 +125,7 @@ network fogComputingNetwork
         @figure[delayreceivesc](type=text; pos=5,730; font=,,bold; text="Smartphone (smartphone from computer): N/A"); 
 
     types:
-        channel Channel extends ned.DelayChannel
-        {
-            delay = 100ms;
-        }
-        channel Channel2 extends ned.DelayChannel
-        {
-            delay = 200ms;
-        }
-        channel Channel3 extends ned.DelayChannel
-        {
-            delay = 250ms;
-        }
+        
     submodules:
         cloud: Cloud {
         	
@@ -144,7 +143,10 @@ network fogComputingNetwork
         }
         
     connections allowunconnected:
-        cloud.foggate <--> Channel2 <--> computer.cloudgate;
-        cloud.hostgate <--> Channel3 <--> host.cloudgate;
-		computer.hostgate <--> Channel <--> host.foggate;
+        cloud.fogout --> {delay = 300ms;} --> computer.cloudin;
+        cloud.hostout --> {delay = 400ms;} --> host.cloudin;
+        host.fogout --> {delay = 50ms;} --> computer.hostin;
+        host.cloudout --> {delay = 400ms;} --> cloud.hostin;
+        computer.cloudout --> {delay = 300ms;} --> cloud.fogin;
+        computer.hostout --> {delay = 50ms;} --> host.fogin;
 }

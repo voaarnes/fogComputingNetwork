@@ -49,6 +49,8 @@ private:
     long msgReceivedHost;
     long msgReceivedComputer;
 
+    // Hypothetical Cue and process delay .
+
     const int S_POWER_CLOUD_TO_HOST = 200;        // In figure 1: total=1600, cloud->host msg=8
     const int S_POWER_CLOUD_TO_FOG = 100;         // total=200, msg=2
     const int R_POWER_HOST_TO_CLOUD = 300;        // total=900, msg=3

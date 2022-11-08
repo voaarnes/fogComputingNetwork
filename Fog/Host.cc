@@ -64,12 +64,12 @@ void Host::sendMessage(ComputerMessage* msg, int dest){
         EV << "This should not happen";
     } else if (dest == 0){
         msgSentCloud++;
-        send(toSend, "cloudgate$o");
+        send(toSend, "cloudout");
         lastCloud = msg;
         scheduleAt(omnetpp::simTime()+timeout, timeoutCloud);
     } else {
         msgSentComputer++;
-        send(toSend, "foggate$o");
+        send(toSend, "fogout");
         lastFog = msg;
         scheduleAt(omnetpp::simTime()+timeout, timeoutFog);
     }
@@ -183,10 +183,10 @@ void Host::ackMessage(ComputerMessage* msg){
        EV << "This should not happen";
    } else if (source == 1){
        msgSentComputer++;
-       send(ack, "foggate$o");
+       send(ack, "fogout");
    } else {
        msgSentCloud++;
-       send(ack, "cloudgate$o");
+       send(ack, "cloudout");
    }
 
 }
@@ -198,13 +198,13 @@ void Host::resendLastMessage(int dest){
     } else if (dest == 1){
         msgSentComputer++;
         ComputerMessage *toSend = lastFog->dup();
-        send(toSend, "foggate$o");
+        send(toSend, "fogout");
         scheduleAt(omnetpp::simTime()+timeout, timeoutFog);
 
     } else {
         msgSentCloud++;
         ComputerMessage *toSend = lastCloud->dup();
-        send(toSend, "cloudgate$o");
+        send(toSend, "cloudout");
         scheduleAt(omnetpp::simTime()+timeout, timeoutCloud);
     }
 
