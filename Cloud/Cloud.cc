@@ -95,6 +95,7 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
                int side = par("leftRightSide").intValue();
                if (side == 0){
                    ComputerMessage* newMsg = generateNewMessage("Book is left");
+                   lastSeq++;
                   newMsg->setType(MSG_FOUND_LEFT);
                   sendMessage(newMsg, 2);
                } else {
