@@ -145,7 +145,6 @@ void Host::handleMessage(omnetpp::cMessage *msg){
                   break;
               }
               case MSG_FOUND_LEFT:{
-                  EV << "To be animated.";
                   bubble("Book is left");
 
                   char str[20] = "Pay the book.";
@@ -155,7 +154,6 @@ void Host::handleMessage(omnetpp::cMessage *msg){
                   break;
               }
               case MSG_FOUND_RIGHT:{
-                   EV << "To be animated.";
                    bubble("Book is RIGHT");
 
                    char str[20] = "Pay the book.";
