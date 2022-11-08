@@ -111,6 +111,7 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
                if (side == 0){
                    char str[40] = "Book is LEFT";
                    ComputerMessage* newMsg = generateNewMessage(str);
+                   lastSeq++;
                   newMsg->setType(MSG_FOUND_LEFT);
                   sendMessage(newMsg, 2);
                } else {

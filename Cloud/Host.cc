@@ -104,7 +104,7 @@ void Host::handleMessage(omnetpp::cMessage *msg){
 
             if (msgLost < 3){
                 msgLost++;
-                getParentModule()->bubble("Message lost");
+                bubble("Message lost");
                 delete msg;
                 return;
             }
@@ -136,7 +136,7 @@ void Host::handleMessage(omnetpp::cMessage *msg){
               case MSG_CLOUD_RDY:
               {
 
-                  getParentModule()->bubble("Ready to start");
+                  bubble("Ready to start");
                   char str[50] = "Where is the book i am looking for?";
                   message = generateNewMessage(str);
                   message->setType(MSG_WHEREIS);
@@ -145,16 +145,21 @@ void Host::handleMessage(omnetpp::cMessage *msg){
                   break;
               }
               case MSG_FOUND_LEFT:{
-                  EV << "To be animated.";
-                  getParentModule()->bubble("Book is left");
+                  bubble("Book is left");
 
-                  scheduleAt(33.0, payBookDelay);
+                  char str[20] = "Pay the book.";
+                  message = generateNewMessage(str);
+                  message->setType(MSG_BOOK_PAY);
+                  sendMessage(message, 1);
                   break;
               }
               case MSG_FOUND_RIGHT:{
-                   EV << "To be animated.";
-                   getParentModule()->bubble("Book is RIGHT");
-                   scheduleAt(33.0, payBookDelay);
+                   bubble("Book is RIGHT");
+
+                   char str[20] = "Pay the book.";
+                   message = generateNewMessage(str);
+                   message->setType(MSG_BOOK_PAY);
+                   sendMessage(message, 1);
                    break;
                }
               default:

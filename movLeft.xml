@@ -1,0 +1,34 @@
+<movement>
+    <!-- draw a hexagon -->
+    <set speed="75" x="725" y="610" angle="-90"/>
+    
+    
+    
+    
+    
+    <wait t="5"/>
+    
+    
+    <moveto x="725" y="520"/>
+    <moveto x="650" y="520"/>
+    <moveto x="650" y="175"/>
+    <moveto x="450" y="175"/>
+    <moveto x="450" y="450"/>
+    
+    <turn angle="90"/>
+    <forward d="0.1"/>
+    <wait t="2"/>
+    
+    <moveto x="450" y="450"/>
+    <moveto x="450" y="175"/>
+    <moveto x="650" y="175"/>
+     
+    <moveto x="650" y="520"/>
+    <moveto x="725" y="520"/>
+    
+    <turn angle="-90"/>
+    <forward d="0.1"/>
+    <wait t="3"/>
+    
+    <moveto x="725" y="650"/>
+</movement>
