@@ -89,18 +89,18 @@ void Host::handleMessage(omnetpp::cMessage *msg){
             return;
         }
         if(msg == timeoutFog){
-                    resendLastMessage(1);
-                    delete msg;
-                    return;
-                }
+            resendLastMessage(1);
+            delete msg;
+            return;
+        }
         else if (msg == payBookDelay){
-                    char str[20] = "Pay the book.";
-                    lastSeq = 9; // Since messages 7/8 are dependent on left right
-                    message = generateNewMessage(str);
-                    message->setType(MSG_BOOK_PAY);
-                    sendMessage(message, 1);
-                    delete msg;
-                }
+            char str[20] = "Pay the book.";
+            lastSeq = 9; // Since messages 7/8 are dependent on left right
+            message = generateNewMessage(str);
+            message->setType(MSG_BOOK_PAY);
+            sendMessage(message, 1);
+            delete msg;
+        }
         else if (msg == browseBookDelay){
             getParentModule()->bubble("Browse book");
             delete msg;
@@ -166,7 +166,7 @@ void Host::handleMessage(omnetpp::cMessage *msg){
                }
               default:
               {
-                EV << "No coded response pepehands.";
+                EV << "No coded response.";
               }
             }
         }
