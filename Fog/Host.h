@@ -40,9 +40,10 @@ private:
     void ackMessage(ComputerMessage* msg);
     ComputerMessage * timeoutFog;
     ComputerMessage * timeoutCloud;
-    ComputerMessage * payBookDelay;
     ComputerMessage *lastFog = NULL;
     ComputerMessage *lastCloud = NULL;
+    ComputerMessage *payBookDelay = NULL;
+    ComputerMessage *browseBookDelay = NULL;
     int lastSeq = 0;
     int msgLost = 0;
 

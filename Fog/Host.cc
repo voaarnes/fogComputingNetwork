@@ -33,6 +33,7 @@ void Host::initialize(){
     timeout = 1.0;
     timeoutFog = new ComputerMessage("timeoutFog");
     timeoutCloud = new ComputerMessage("timeoutCloud");
+    browseBookDelay = new ComputerMessage("browseBook");
     payBookDelay = new ComputerMessage("payBook");
 
     msgSentComputer = 0;
@@ -90,12 +91,18 @@ void Host::handleMessage(omnetpp::cMessage *msg){
                     resendLastMessage(1);
                     delete msg;
                     return;
-        }
-        if (msg == payBookDelay){
-            char str[20] = "Pay the book.";
-            message = generateNewMessage(str);
-            message->setType(MSG_BOOK_PAY);
-            sendMessage(message, 1);
+                }
+        else if (msg == payBookDelay){
+                    char str[20] = "Pay the book.";
+                    lastSeq = 9; // Since messages 7/8 are dependent on left right
+                    message = generateNewMessage(str);
+                    message->setType(MSG_BOOK_PAY);
+                    sendMessage(message, 1);
+                    delete msg;
+                }
+        else if (msg == browseBookDelay){
+            getParentModule()->bubble("Browse book");
+            delete msg;
         }
         else {
 
@@ -144,12 +151,16 @@ void Host::handleMessage(omnetpp::cMessage *msg){
                   break;
               }
               case MSG_FOUND_LEFT:{
+                //   EV << "To be animated.";
                   getParentModule()->bubble("Book is left");
+                  scheduleAt(18.5, browseBookDelay);
                   scheduleAt(33.0, payBookDelay);
                   break;
               }
               case MSG_FOUND_RIGHT:{
-                  getParentModule()->bubble("Book is right");
+                //    EV << "To be animated.";
+                   getParentModule()->bubble("Book is RIGHT");
+                   scheduleAt(18.5, browseBookDelay);
                    scheduleAt(33.0, payBookDelay);
                    break;
                }
