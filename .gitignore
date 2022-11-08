@@ -33,7 +33,18 @@
 
 # OMNET specific
 Makefile
-out/    
+out/ 
+Cloud/out/
+Cloud/results/
+Cloud/.settings
+Cloud/Cloud
+Cloud/Cloud_dbg
+Fog/out/
+Fog/results/
+Fog/.settings
+Fog/Fog
+Fog/Fog_dbg
+
 computerMessage_m.cc
 computerMessage_m.h
 fogComputingNetwork_dbg

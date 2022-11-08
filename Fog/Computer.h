@@ -27,6 +27,7 @@ public:
     virtual ~Computer();
     virtual void initialize() override;
     virtual void handleMessage(omnetpp::cMessage *msg) override;
+    virtual void refreshDisplay() const override;
 
 private:
     void sendMessage(ComputerMessage* msg, int dest);
@@ -43,6 +44,21 @@ private:
 
     float timeout = 1.0f;
     bool lastAcked = false;
+
+    long msgSentHost;
+    long msgSentCloud;
+    long msgReceivedHost;
+    long msgReceivedCloud;
+
+    const int S_POWER_FOG_TO_CLOUD = 300;
+    const int S_POWER_FOG_TO_HOST = 200;
+    const int R_POWER_CLOUD_TO_FOG = 300;
+    const int R_POWER_HOST_TO_FOG = 300;
+    const int S_DELAY_FOG_TO_CLOUD = 300;
+    const int S_DELAY_FOG_TO_HOST = 50;
+    const int R_DELAY_CLOUD_TO_FOG = 200;
+    const int R_DELAY_HOST_TO_FOG = 50;
+
 
 };
 Define_Module(Computer);
