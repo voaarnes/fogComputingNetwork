@@ -45,6 +45,8 @@ private:
     ComputerMessage *lastCloud = NULL;
     ComputerMessage *payBookDelay = NULL;
     ComputerMessage *browseBookDelay = NULL;
+    ComputerMessage *processingDelay = NULL;
+    ComputerMessage *cachedMessage = NULL;
     int lastSeq = 0;
     int msgLost = 0;
 
@@ -52,7 +54,6 @@ private:
     long msgSentComputer;
     long msgReceivedCloud;
     long msgReceivedComputer;
-
 
     long ackSentCloud;
     long ackSentComputer;

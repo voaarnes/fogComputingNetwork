@@ -45,6 +45,9 @@ private:
     ComputerMessage *lastFog = NULL;
     ComputerMessage *lastHost = NULL;
     int side;
+    ComputerMessage *processingDelay = NULL;
+    ComputerMessage *cachedMessage = NULL;
+
 
     long msgSentHost;
     long msgSentComputer;

@@ -38,6 +38,8 @@ private:
     ComputerMessage * timeoutCloud;
     ComputerMessage *lastHost = NULL;
     ComputerMessage *lastCloud = NULL;
+    ComputerMessage *processingDelay = NULL;
+    ComputerMessage *cachedMessage = NULL;
     ComputerMessage *generateNewMessage(char* str);
     int lastDest;
     int lastSeq = 0;
@@ -49,8 +51,6 @@ private:
     long msgSentCloud;
     long msgReceivedHost;
     long msgReceivedCloud;
-
-
     long ackSentHost;
     long ackSentCloud;
     long ackReceivedHost;

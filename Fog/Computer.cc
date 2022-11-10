@@ -137,7 +137,7 @@ void Computer::handleMessage(omnetpp::cMessage *msg) {
                        // Fog stuff
                        if (lastCloud->getType() == MSG_CONTENTS){
                            if (!isStarted) {
-                             char str[40] = "Cloud ready to start";
+                             char str[40] = "Computer ready to start";
                              ComputerMessage* newMsg = generateNewMessage(str);
                              newMsg->setType(MSG_CLOUD_RDY);
                              sendMessage(newMsg, 2);

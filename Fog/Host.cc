@@ -73,19 +73,18 @@ ComputerMessage *Host::generateNewMessage(char* str){
 
 void Host::sendMessage(ComputerMessage* msg, int dest){
     ComputerMessage *toSend = msg->dup();
-
     if (dest == 2){
         EV << "This should not happen";
     } else if (dest == 0){
         msgSentCloud++;
-        send(toSend, "cloudout");
+        sendDelayed(toSend, S_DELAY_HOST_TO_CLOUD / 1000.0, "cloudout");
+        scheduleAt(omnetpp::simTime()+timeout+(S_DELAY_HOST_TO_CLOUD / 1000.0), timeoutCloud);
         lastCloud = msg;
-        scheduleAt(omnetpp::simTime()+timeout, timeoutCloud);
     } else {
         msgSentComputer++;
-        send(toSend, "fogout");
         lastFog = msg;
-        scheduleAt(omnetpp::simTime()+timeout, timeoutFog);
+        sendDelayed(toSend, S_DELAY_HOST_TO_FOG / 1000.0, "fogout");
+        scheduleAt(omnetpp::simTime()+timeout+(S_DELAY_HOST_TO_FOG / 1000.0), timeoutFog);
     }
 
 }
@@ -144,12 +143,13 @@ void Host::handleMessage(omnetpp::cMessage *msg){
              } else if (cMsg->getType() != MSG_ACK) {
 
                  //if(cMsg->getType() != 0){
+
+
                  ackMessage(cMsg);
 
                  // Ignore this for ACKS
                  cachedMessage = cMsg;
                  if (src == 1){
-                     EV << "SMall wait\n";
                      scheduleAt(omnetpp::simTime()+(R_DELAY_FOG_TO_HOST/1000.0), processingDelay);
                  } else {
                      scheduleAt(omnetpp::simTime()+(R_DELAY_CLOUD_TO_HOST/1000.0), processingDelay);
@@ -193,7 +193,6 @@ void Host::handleMessage(omnetpp::cMessage *msg){
               message = generateNewMessage(str);
               message->setType(MSG_WHEREIS);
               sendMessage(message, 1);
-              return;
               break;
           }
           case MSG_FOUND_LEFT:{
@@ -224,13 +223,20 @@ void Host::handleMessage(omnetpp::cMessage *msg){
 
 void Host::ackMessage(ComputerMessage* msg){
     lastSeq = msg->getSeq();
+    // Since the LEFT/RIGHT messages differ in seq number this will simply set seq to be 8
+    // So that the ACK is number 9
+    if (msg->getType() == MSG_FOUND_LEFT || msg->getType() == MSG_FOUND_RIGHT){
+     lastSeq = 8;
+    }
+
+
     ComputerMessage *ack;
     int source = msg->getSource();
     char msgText[30];
     if (source == 2){
-        sprintf(msgText, "ACK from Host to Computer");
+        sprintf(msgText, "ACK from Host to Computer", lastSeq);
     } else {
-        sprintf(msgText, "ACK from Host to Cloud");
+        sprintf(msgText, "ACK from Host to Cloud", lastSeq);
     }
     ack = generateNewMessage(msgText);
     ack->setType(MSG_ACK);
@@ -254,14 +260,14 @@ void Host::resendLastMessage(int dest){
     } else if (dest == 1){
         msgSentComputer++;
         ComputerMessage *toSend = lastFog->dup();
-        sendDelayed(toSend,S_DELAY_HOST_TO_FOG / 1000.0, "fogout");
-        scheduleAt(omnetpp::simTime()+timeout+(S_DELAY_HOST_TO_FOG / 1000.0), timeoutFog);
+        send(toSend, "fogout");
+        scheduleAt(omnetpp::simTime()+timeout, timeoutFog);
 
     } else {
         msgSentCloud++;
         ComputerMessage *toSend = lastCloud->dup();
-        sendDelayed(toSend, S_DELAY_HOST_TO_CLOUD / 1000.0, "cloudout");
-        scheduleAt(omnetpp::simTime()+timeout+(S_DELAY_HOST_TO_CLOUD / 1000.0), timeoutCloud);
+        send(toSend, "cloudout");
+        scheduleAt(omnetpp::simTime()+timeout, timeoutCloud);
     }
 
 }
