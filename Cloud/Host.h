@@ -20,6 +20,7 @@
 #include <omnetpp/csimplemodule.h>
 #include "computerMessage_m.h"
 #include "MessageType.h"
+#include "Constants.h"
 
 class Host: public omnetpp::cSimpleModule {
 private:
@@ -52,14 +53,11 @@ private:
     long msgReceivedCloud;
     long msgReceivedComputer;
 
-    const int S_POWER_HOST_TO_CLOUD = 300;
-    const int S_POWER_HOST_TO_FOG = 300;
-    const int R_POWER_CLOUD_TO_HOST = 250;
-    const int R_POWER_FOG_TO_HOST = 250;
-    const int S_DELAY_HOST_TO_CLOUD = 400;
-    const int S_DELAY_HOST_TO_FOG = 50;
-    const int R_DELAY_CLOUD_TO_HOST= 400;
-    const int R_DELAY_FOG_TO_HOST = 50;
+
+    long ackSentCloud;
+    long ackSentComputer;
+    long ackReceivedCloud;
+    long ackReceivedComputer;
 };
 Define_Module(Host);
 #endif /* HOST_H_ */

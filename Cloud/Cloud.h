@@ -22,6 +22,7 @@
 #include "computerMessage_m.h"
 #include <omnetpp.h>
 #include "MessageType.h"
+#include "Constants.h"
 
 class Cloud: public omnetpp::cSimpleModule {
 public:
@@ -50,16 +51,12 @@ private:
     long msgReceivedHost;
     long msgReceivedComputer;
 
+    long ackSentHost;
+    long ackSentComputer;
+    long ackReceivedHost;
+    long ackReceivedComputer;
     // Hypothetical Cue and process delay .
 
-    const int S_POWER_CLOUD_TO_HOST = 200;        // In figure 1: total=1600, cloud->host msg=8
-    const int S_POWER_CLOUD_TO_FOG = 100;         // total=200, msg=2
-    const int R_POWER_HOST_TO_CLOUD = 300;        // total=900, msg=3
-    const int R_POWER_FOG_TO_CLOUD = 300;         // total=600, msg=2
-    const int S_DELAY_CLOUD_TO_HOST = 400;        // total=3200, msg = 8
-    const int S_DELAY_CLOUD_TO_FOG = 300;         // total=600, msg=2
-    const int R_DELAY_HOST_TO_CLOUD= 400;        // total=1200, msg=3
-    const int R_DELAY_FOG_TO_CLOUD = 200;         // total=400, msg=2
 
 };
 

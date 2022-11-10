@@ -53,6 +53,11 @@ private:
     long msgReceivedHost;
     long msgReceivedCloud;
 
+    long ackSentHost;
+    long ackSentCloud;
+    long ackReceivedHost;
+    long ackReceivedCloud;
+
 
 };
 Define_Module(Computer);
