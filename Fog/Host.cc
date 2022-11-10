@@ -72,7 +72,7 @@ void Host::sendMessage(ComputerMessage* msg, int dest){
         msgSentComputer++;
         lastFog = msg;
         sendDelayed(toSend, S_DELAY_HOST_TO_FOG / 1000.0, "fogout");
-        scheduleAt(omnetpp::simTime()+timeout+(S_DELAY_HOST_TO_FOG / 1000.0), timeoutCloud);
+        scheduleAt(omnetpp::simTime()+timeout+(S_DELAY_HOST_TO_FOG / 1000.0), timeoutFog);
     }
 
 }
