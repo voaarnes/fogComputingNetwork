@@ -131,12 +131,13 @@ void Host::handleMessage(omnetpp::cMessage *msg){
              } else if (cMsg->getType() != MSG_ACK) {
 
                  //if(cMsg->getType() != 0){
+
+
                  ackMessage(cMsg);
 
                  // Ignore this for ACKS
                  cachedMessage = cMsg;
                  if (src == 1){
-                     EV << "SMall wait\n";
                      scheduleAt(omnetpp::simTime()+(R_DELAY_FOG_TO_HOST/1000.0), processingDelay);
                  } else {
                      scheduleAt(omnetpp::simTime()+(R_DELAY_CLOUD_TO_HOST/1000.0), processingDelay);
@@ -207,13 +208,20 @@ void Host::handleMessage(omnetpp::cMessage *msg){
 
 void Host::ackMessage(ComputerMessage* msg){
     lastSeq = msg->getSeq();
+    // Since the LEFT/RIGHT messages differ in seq number this will simply set seq to be 8
+    // So that the ACK is number 9
+    if (msg->getType() == MSG_FOUND_LEFT || msg->getType() == MSG_FOUND_RIGHT){
+     lastSeq = 8;
+    }
+
+
     ComputerMessage *ack;
     int source = msg->getSource();
     char msgText[30];
     if (source == 2){
-        sprintf(msgText, "ACK from Host to Computer");
+        sprintf(msgText, "ACK from Host to Computer", lastSeq);
     } else {
-        sprintf(msgText, "ACK from Host to Cloud");
+        sprintf(msgText, "ACK from Host to Cloud", lastSeq);
     }
     ack = generateNewMessage(msgText);
     ack->setType(MSG_ACK);

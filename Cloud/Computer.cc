@@ -133,7 +133,8 @@ void Computer::handleMessage(omnetpp::cMessage *msg) {
                   ComputerMessage *message = generateNewMessage(str); // Creating placeholder message for access to variables in generate.
                   message->setType(MSG_BOOK_PAYED);
                   sendMessage(message, 2);
-
+                  // Account for ack that comes in return
+                  lastSeq++;
 
                    char str1[20] = "Book contents";
                    message = generateNewMessage(str1); // Creating placeholder message for access to variables in generate.

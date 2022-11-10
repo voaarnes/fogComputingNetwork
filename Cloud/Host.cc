@@ -72,7 +72,7 @@ void Host::sendMessage(ComputerMessage* msg, int dest){
         msgSentComputer++;
         lastFog = msg;
         sendDelayed(toSend, S_DELAY_HOST_TO_FOG / 1000.0, "fogout");
-        scheduleAt(omnetpp::simTime()+timeout+(S_DELAY_HOST_TO_FOG / 1000.0), timeoutCloud);
+        scheduleAt(omnetpp::simTime()+timeout+(S_DELAY_HOST_TO_FOG / 1000.0), timeoutFog);
     }
 
 }
@@ -106,7 +106,6 @@ void Host::handleMessage(omnetpp::cMessage *msg){
         }
         else if (msg == payBookDelay){
             char str[20] = "Pay the book.";
-            lastSeq = 9; // Since messages 7/8 are dependent on left right
             message = generateNewMessage(str);
             message->setType(MSG_BOOK_PAY);
             sendMessage(message, 1);
@@ -207,6 +206,9 @@ void Host::handleMessage(omnetpp::cMessage *msg){
 
 void Host::ackMessage(ComputerMessage* msg){
     lastSeq = msg->getSeq();
+    if (msg->getType() == MSG_FOUND_LEFT || msg->getType() == MSG_FOUND_RIGHT){
+         lastSeq = 8;
+    }
     ComputerMessage *ack;
     int source = msg->getSource();
     char msgText[40];
