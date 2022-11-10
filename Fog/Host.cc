@@ -61,19 +61,18 @@ ComputerMessage *Host::generateNewMessage(char* str){
 
 void Host::sendMessage(ComputerMessage* msg, int dest){
     ComputerMessage *toSend = msg->dup();
-
     if (dest == 2){
         EV << "This should not happen";
     } else if (dest == 0){
         msgSentCloud++;
-        send(toSend, "cloudout");
+        sendDelayed(toSend, S_DELAY_HOST_TO_CLOUD / 1000.0, "cloudout");
+        scheduleAt(omnetpp::simTime()+timeout+(S_DELAY_HOST_TO_CLOUD / 1000.0), timeoutCloud);
         lastCloud = msg;
-        scheduleAt(omnetpp::simTime()+timeout, timeoutCloud);
     } else {
         msgSentComputer++;
-        send(toSend, "fogout");
         lastFog = msg;
-        scheduleAt(omnetpp::simTime()+timeout, timeoutFog);
+        sendDelayed(toSend, S_DELAY_HOST_TO_FOG / 1000.0, "fogout");
+        scheduleAt(omnetpp::simTime()+timeout+(S_DELAY_HOST_TO_FOG / 1000.0), timeoutCloud);
     }
 
 }
@@ -178,7 +177,6 @@ void Host::handleMessage(omnetpp::cMessage *msg){
               message = generateNewMessage(str);
               message->setType(MSG_WHEREIS);
               sendMessage(message, 1);
-              return;
               break;
           }
           case MSG_FOUND_LEFT:{
@@ -239,14 +237,14 @@ void Host::resendLastMessage(int dest){
     } else if (dest == 1){
         msgSentComputer++;
         ComputerMessage *toSend = lastFog->dup();
-        sendDelayed(toSend,S_DELAY_HOST_TO_FOG / 1000.0, "fogout");
-        scheduleAt(omnetpp::simTime()+timeout+(S_DELAY_HOST_TO_FOG / 1000.0), timeoutFog);
+        send(toSend, "fogout");
+        scheduleAt(omnetpp::simTime()+timeout, timeoutFog);
 
     } else {
         msgSentCloud++;
         ComputerMessage *toSend = lastCloud->dup();
-        sendDelayed(toSend, S_DELAY_HOST_TO_CLOUD / 1000.0, "cloudout");
-        scheduleAt(omnetpp::simTime()+timeout+(S_DELAY_HOST_TO_CLOUD / 1000.0), timeoutCloud);
+        send(toSend, "cloudout");
+        scheduleAt(omnetpp::simTime()+timeout, timeoutCloud);
     }
 
 }

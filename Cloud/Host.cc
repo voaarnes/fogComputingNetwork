@@ -35,7 +35,7 @@ void Host::initialize(){
     timeoutCloud = new ComputerMessage("timeoutCloud");
     browseBookDelay = new ComputerMessage("browseBook");
     payBookDelay = new ComputerMessage("payBook");
-
+    processingDelay = new ComputerMessage("processingDelay");
 
     msgSentComputer = 0;
     msgSentCloud = 0;
@@ -61,19 +61,18 @@ ComputerMessage *Host::generateNewMessage(char* str){
 
 void Host::sendMessage(ComputerMessage* msg, int dest){
     ComputerMessage *toSend = msg->dup();
-
     if (dest == 2){
         EV << "This should not happen";
     } else if (dest == 0){
         msgSentCloud++;
-        send(toSend, "cloudout");
+        sendDelayed(toSend, S_DELAY_HOST_TO_CLOUD / 1000.0, "cloudout");
+        scheduleAt(omnetpp::simTime()+timeout+(S_DELAY_HOST_TO_CLOUD / 1000.0), timeoutCloud);
         lastCloud = msg;
-        scheduleAt(omnetpp::simTime()+timeout, timeoutCloud);
     } else {
         msgSentComputer++;
-        send(toSend, "fogout");
         lastFog = msg;
-        scheduleAt(omnetpp::simTime()+timeout, timeoutFog);
+        sendDelayed(toSend, S_DELAY_HOST_TO_FOG / 1000.0, "fogout");
+        scheduleAt(omnetpp::simTime()+timeout+(S_DELAY_HOST_TO_FOG / 1000.0), timeoutCloud);
     }
 
 }
@@ -82,6 +81,18 @@ void Host::sendMessage(ComputerMessage* msg, int dest){
 
 
 void Host::handleMessage(omnetpp::cMessage *msg){
+        ComputerMessage *cMsg = omnetpp::check_and_cast<ComputerMessage *>(msg);
+
+
+        // Logic for dropping first couple of messages
+        if (msgLost < 3){
+            msgLost++;
+            getParentModule()->bubble("Message lost");
+            delete msg;
+            return;
+        }
+
+
 
         if(msg == timeoutCloud){
             resendLastMessage(0);
@@ -100,31 +111,50 @@ void Host::handleMessage(omnetpp::cMessage *msg){
             message->setType(MSG_BOOK_PAY);
             sendMessage(message, 1);
             delete msg;
+            return;
         }
         else if (msg == browseBookDelay){
             getParentModule()->bubble("Browse book");
             delete msg;
+            return;
         }
         else {
+            int src = cMsg->getSource();
 
 
-            if (msgLost < 3){
-                msgLost++;
-                getParentModule()->bubble("Message lost");
-                delete msg;
-                return;
-            }
+             // ADD RECIVING DELAY
+             if (msg == processingDelay){
+                 cMsg = cachedMessage;
+                 msg = cachedMessage;
 
-            ComputerMessage *cmmsg = omnetpp::check_and_cast<ComputerMessage *>(msg);
-            if(cmmsg->getSource() == 0) {msgReceivedCloud++;}
-            else {msgReceivedComputer++;}
+                 EV << "Here we go again\n";
+             } else if (cMsg->getType() != MSG_ACK) {
 
-            if(cmmsg->getType() != 0){
-                ackMessage(cmmsg);
-            }
-            int type = cmmsg->getType();
-            int src = cmmsg->getSource();
-            delete cmmsg;
+                 //if(cMsg->getType() != 0){
+                 ackMessage(cMsg);
+
+                 // Ignore this for ACKS
+                 cachedMessage = cMsg;
+                 if (src == 1){
+                     EV << "SMall wait\n";
+                     scheduleAt(omnetpp::simTime()+(R_DELAY_FOG_TO_HOST/1000.0), processingDelay);
+                 } else {
+                     scheduleAt(omnetpp::simTime()+(R_DELAY_CLOUD_TO_HOST/1000.0), processingDelay);
+                 }
+                 return;
+             }
+        }
+
+
+
+        if(cMsg->getSource() == 0) {msgReceivedCloud++;}
+        else {msgReceivedComputer++;}
+
+
+        int type = cMsg->getType();
+        int src = cMsg->getSource();
+        int seq = cMsg->getSeq();
+        delete cMsg;
 
             switch(type) {
               case 0:
@@ -169,8 +199,6 @@ void Host::handleMessage(omnetpp::cMessage *msg){
                 EV << "No coded response.";
               }
             }
-        }
-
 
 }
 
@@ -204,8 +232,6 @@ void Host::ackMessage(ComputerMessage* msg){
 
 
 void Host::resendLastMessage(int dest){
-
-
     if (dest == 2){
         EV << "This should not happen";
     } else if (dest == 1){

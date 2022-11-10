@@ -30,6 +30,7 @@ void Cloud::initialize() {
     // Send contents to cloud
     timeoutHost = new ComputerMessage("timeoutHost");
     timeoutFog = new ComputerMessage("timeoutFog");
+    processingDelay = new ComputerMessage("processingDelay");
 
     msgSentHost = 0;
     msgSentComputer = 0;
@@ -63,20 +64,41 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
           resendLastMessage(1);
           return;
   }
+
    ComputerMessage *cMsg = dynamic_cast<ComputerMessage *>(msg);
+   if (cMsg != processingDelay){
+       if(cMsg->getSource() == 1) {msgReceivedComputer++;}
+          else {msgReceivedHost++;}
+   }
+
 
    if (cMsg != NULL){
-
-       if(cMsg->getSource() == 1) {msgReceivedComputer++;}
-       else {msgReceivedHost++;}
-
        if (cMsg->getType() != 0){
            ackMessage(cMsg);
        }
 
-       int type = cMsg->getType();
-       int src = cMsg->getSource();
 
+       int src = cMsg->getSource();
+      // ADD RECIVING DELAY
+      if (msg == processingDelay){
+          cMsg = cachedMessage;
+
+      } else if (cMsg->getType() != MSG_ACK) {
+          // Ignore this for ACKS
+          cachedMessage = cMsg;
+          if (src == 1){
+              scheduleAt(omnetpp::simTime()+(R_DELAY_FOG_TO_CLOUD/1000.0), processingDelay);
+          } else {
+              scheduleAt(omnetpp::simTime()+(R_DELAY_HOST_TO_CLOUD/1000.0), processingDelay);
+          }
+          return;
+      }
+
+
+
+       int type = cMsg->getType();
+       src = cMsg->getSource();
+       int seq = cMsg->getSeq();
        delete cMsg;
        switch (type){
            case 0: {
@@ -87,6 +109,7 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
                    cancelEvent(timeoutHost);
                    delete lastHost;
                }
+               lastSeq = seq;
                break;
            }
            case MSG_CONTENTS: {
@@ -101,7 +124,7 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
 
                break;
            }
-           case 3: {
+           case MSG_WHEREIS: {
                // Reply type 4
                // Left or right
                EV << "Received request for book\n";
@@ -111,7 +134,6 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
                if (side == 0){
                    char str[40] = "Book is LEFT";
                    ComputerMessage* newMsg = generateNewMessage(str);
-                   lastSeq++;
                   newMsg->setType(MSG_FOUND_LEFT);
                   sendMessage(newMsg, 2);
                } else {
@@ -155,11 +177,9 @@ void Cloud::ackMessage(ComputerMessage* msg){
        EV << "This should not happen";
    } else if (source == 1){
        msgSentComputer++;
-       //send(ack, "foggate$o");
        send(ack, "fogout");
    } else {
        msgSentHost++;
-       //send(ack, "hostgate$o");
        send(ack, "hostout");
    }
 
@@ -193,17 +213,17 @@ void Cloud::sendMessage(ComputerMessage* msg, int dest){
         EV << "This should not happen";
     } else if (dest == 1){
         msgSentComputer++;
-        send(toSend, "fogout");
+        sendDelayed(toSend, S_DELAY_CLOUD_TO_FOG / 1000.0, "fogout");
 
         lastFog = msg;
-        scheduleAt(omnetpp::simTime()+timeout, timeoutFog);
+        scheduleAt(omnetpp::simTime()+timeout+(S_DELAY_CLOUD_TO_FOG / 1000.0), timeoutFog);
     } else {
         msgSentHost++;
-        send(toSend, "hostout");
+        sendDelayed(toSend, S_DELAY_CLOUD_TO_HOST / 1000.0, "hostout");
 
 
         lastHost = msg;
-        scheduleAt(omnetpp::simTime()+timeout, timeoutHost);
+        scheduleAt(omnetpp::simTime()+timeout+(S_DELAY_CLOUD_TO_HOST / 1000.0), timeoutHost);
     }
 
 }
