@@ -20,6 +20,7 @@
 #include <omnetpp.h>
 #include "computerMessage_m.h"
 #include "MessageType.h"
+#include "Constants.h"
 
 class Computer: public omnetpp::cSimpleModule {
 public:
@@ -38,6 +39,8 @@ private:
     ComputerMessage * timeoutCloud;
     ComputerMessage *lastHost = NULL;
     ComputerMessage *lastCloud = NULL;
+    ComputerMessage *processingDelay = NULL;
+    ComputerMessage *cachedMessage = NULL;
     ComputerMessage *generateNewMessage(char* str);
     bool isStarted = false;
     int lastSeq = 0;
@@ -49,15 +52,6 @@ private:
     long msgSentCloud;
     long msgReceivedHost;
     long msgReceivedCloud;
-
-    const int S_POWER_FOG_TO_CLOUD = 300;
-    const int S_POWER_FOG_TO_HOST = 200;
-    const int R_POWER_CLOUD_TO_FOG = 300;
-    const int R_POWER_HOST_TO_FOG = 300;
-    const int S_DELAY_FOG_TO_CLOUD = 300;
-    const int S_DELAY_FOG_TO_HOST = 50;
-    const int R_DELAY_CLOUD_TO_FOG = 200;
-    const int R_DELAY_HOST_TO_FOG = 50;
 
 
 };

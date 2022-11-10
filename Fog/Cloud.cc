@@ -30,6 +30,7 @@ void Cloud::initialize() {
     // Send contents to cloud
     timeoutHost = new ComputerMessage("timeoutHost");
     timeoutFog = new ComputerMessage("timeoutFog");
+    processingDelay = new ComputerMessage("processingDelay");
 
     side = par("leftRightSide").intValue();
 
@@ -67,8 +68,10 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
   }
 
    ComputerMessage *cMsg = dynamic_cast<ComputerMessage *>(msg);
-   if(cMsg->getSource() == 1) {msgReceivedComputer++;}
-   else {msgReceivedHost++;}
+   if (cMsg != processingDelay){
+       if(cMsg->getSource() == 1) {msgReceivedComputer++;}
+          else {msgReceivedHost++;}
+   }
 
 
    if (cMsg != NULL){
@@ -76,8 +79,27 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
            ackMessage(cMsg);
        }
 
-       int type = cMsg->getType();
+
        int src = cMsg->getSource();
+      // ADD RECIVING DELAY
+      if (msg == processingDelay){
+          cMsg = cachedMessage;
+
+      } else if (cMsg->getType() != MSG_ACK) {
+          // Ignore this for ACKS
+          cachedMessage = cMsg;
+          if (src == 1){
+              scheduleAt(omnetpp::simTime()+(R_DELAY_FOG_TO_CLOUD/1000.0), processingDelay);
+          } else {
+              scheduleAt(omnetpp::simTime()+(R_DELAY_HOST_TO_CLOUD/1000.0), processingDelay);
+          }
+          return;
+      }
+
+
+
+       int type = cMsg->getType();
+       src = cMsg->getSource();
        int seq = cMsg->getSeq();
        delete cMsg;
        switch (type){
@@ -189,17 +211,17 @@ void Cloud::sendMessage(ComputerMessage* msg, int dest){
         EV << "This should not happen";
     } else if (dest == 1){
         msgSentComputer++;
-        send(toSend, "fogout");
+        sendDelayed(toSend, S_DELAY_CLOUD_TO_FOG / 1000.0, "fogout");
 
         lastFog = msg;
-        scheduleAt(omnetpp::simTime()+timeout, timeoutFog);
+        scheduleAt(omnetpp::simTime()+timeout+(S_DELAY_CLOUD_TO_FOG / 1000.0), timeoutFog);
     } else {
         msgSentHost++;
-        send(toSend, "hostout");
+        sendDelayed(toSend, S_DELAY_CLOUD_TO_HOST / 1000.0, "hostout");
 
 
         lastHost = msg;
-        scheduleAt(omnetpp::simTime()+timeout, timeoutHost);
+        scheduleAt(omnetpp::simTime()+timeout+(S_DELAY_CLOUD_TO_HOST / 1000.0), timeoutHost);
     }
 
 }

@@ -33,6 +33,7 @@ void Host::initialize(){
     timeout = 1.0;
     timeoutFog = new ComputerMessage("timeoutFog");
     timeoutCloud = new ComputerMessage("timeoutCloud");
+    browseBookDelay = new ComputerMessage("browseBook");
     payBookDelay = new ComputerMessage("payBook");
 
 
@@ -88,23 +89,28 @@ void Host::handleMessage(omnetpp::cMessage *msg){
             return;
         }
         if(msg == timeoutFog){
-                    resendLastMessage(1);
-                    delete msg;
-                    return;
-                }
-
-        if (msg == payBookDelay){
-                    char str[20] = "Pay the book.";
-                    message = generateNewMessage(str);
-                    message->setType(MSG_BOOK_PAY);
-                    sendMessage(message, 1);
-                }
+            resendLastMessage(1);
+            delete msg;
+            return;
+        }
+        else if (msg == payBookDelay){
+            char str[20] = "Pay the book.";
+            lastSeq = 9; // Since messages 7/8 are dependent on left right
+            message = generateNewMessage(str);
+            message->setType(MSG_BOOK_PAY);
+            sendMessage(message, 1);
+            delete msg;
+        }
+        else if (msg == browseBookDelay){
+            getParentModule()->bubble("Browse book");
+            delete msg;
+        }
         else {
 
 
             if (msgLost < 3){
                 msgLost++;
-                bubble("Message lost");
+                getParentModule()->bubble("Message lost");
                 delete msg;
                 return;
             }
@@ -136,7 +142,7 @@ void Host::handleMessage(omnetpp::cMessage *msg){
               case MSG_CLOUD_RDY:
               {
 
-                  bubble("Ready to start");
+                  getParentModule()->bubble("Ready to start");
                   char str[50] = "Where is the book i am looking for?";
                   message = generateNewMessage(str);
                   message->setType(MSG_WHEREIS);
@@ -145,26 +151,22 @@ void Host::handleMessage(omnetpp::cMessage *msg){
                   break;
               }
               case MSG_FOUND_LEFT:{
-                  bubble("Book is left");
-
-                  char str[20] = "Pay the book.";
-                  message = generateNewMessage(str);
-                  message->setType(MSG_BOOK_PAY);
-                  sendMessage(message, 1);
+                //   EV << "To be animated.";
+                  getParentModule()->bubble("Book is left");
+                  scheduleAt(18.5, browseBookDelay);
+                  scheduleAt(33.0, payBookDelay);
                   break;
               }
               case MSG_FOUND_RIGHT:{
-                   bubble("Book is RIGHT");
-
-                   char str[20] = "Pay the book.";
-                   message = generateNewMessage(str);
-                   message->setType(MSG_BOOK_PAY);
-                   sendMessage(message, 1);
+                //    EV << "To be animated.";
+                   getParentModule()->bubble("Book is RIGHT");
+                   scheduleAt(18.5, browseBookDelay);
+                   scheduleAt(33.0, payBookDelay);
                    break;
                }
               default:
               {
-                EV << "No coded response pepehands.";
+                EV << "No coded response.";
               }
             }
         }

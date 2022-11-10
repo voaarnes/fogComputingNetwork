@@ -33,7 +33,9 @@ void Host::initialize(){
     timeout = 1.0;
     timeoutFog = new ComputerMessage("timeoutFog");
     timeoutCloud = new ComputerMessage("timeoutCloud");
+    browseBookDelay = new ComputerMessage("browseBook");
     payBookDelay = new ComputerMessage("payBook");
+    processingDelay = new ComputerMessage("processingDelay");
 
     msgSentComputer = 0;
     msgSentCloud = 0;
@@ -80,6 +82,18 @@ void Host::sendMessage(ComputerMessage* msg, int dest){
 
 
 void Host::handleMessage(omnetpp::cMessage *msg){
+        ComputerMessage *cMsg = omnetpp::check_and_cast<ComputerMessage *>(msg);
+
+
+        // Logic for dropping first couple of messages
+        if (msgLost < 3){
+            msgLost++;
+            getParentModule()->bubble("Message lost");
+            delete msg;
+            return;
+        }
+
+
 
         if(msg == timeoutCloud){
             resendLastMessage(0);
@@ -90,74 +104,101 @@ void Host::handleMessage(omnetpp::cMessage *msg){
                     resendLastMessage(1);
                     delete msg;
                     return;
-        }
-        if (msg == payBookDelay){
-            char str[20] = "Pay the book.";
-            message = generateNewMessage(str);
-            message->setType(MSG_BOOK_PAY);
-            sendMessage(message, 1);
+                }
+        else if (msg == payBookDelay){
+                    char str[20] = "Pay the book.";
+                    lastSeq = 9; // Since messages 7/8 are dependent on left right
+                    message = generateNewMessage(str);
+                    message->setType(MSG_BOOK_PAY);
+                    sendMessage(message, 1);
+                    delete msg;
+                    return;
+                }
+        else if (msg == browseBookDelay){
+            getParentModule()->bubble("Browse book");
+            delete msg;
+            return;
         }
         else {
+            int src = cMsg->getSource();
 
 
-            if (msgLost < 3){
-                msgLost++;
-                getParentModule()->bubble("Message lost");
-                delete msg;
-                return;
-            }
+             // ADD RECIVING DELAY
+             if (msg == processingDelay){
+                 cMsg = cachedMessage;
+                 msg = cachedMessage;
 
-            ComputerMessage *cmmsg = omnetpp::check_and_cast<ComputerMessage *>(msg);
-            if(cmmsg->getSource() == 0) {msgReceivedCloud++;}
-            else {msgReceivedComputer++;}
+                 EV << "Here we go again\n";
+             } else if (cMsg->getType() != MSG_ACK) {
 
-            if(cmmsg->getType() != 0){
-                ackMessage(cmmsg);
-            }
-            int type = cmmsg->getType();
-            int src = cmmsg->getSource();
-            int seq = cmmsg->getSeq();
-            delete cmmsg;
+                 //if(cMsg->getType() != 0){
+                 ackMessage(cMsg);
 
-            switch(type) {
-              case 0:
-              {
-                  if (src == 0){
-                     cancelEvent(timeoutCloud);
-                     delete lastCloud;
+                 // Ignore this for ACKS
+                 cachedMessage = cMsg;
+                 if (src == 1){
+                     EV << "SMall wait\n";
+                     scheduleAt(omnetpp::simTime()+(R_DELAY_FOG_TO_HOST/1000.0), processingDelay);
                  } else {
-                     cancelEvent(timeoutFog);
-                     delete lastFog;
+                     scheduleAt(omnetpp::simTime()+(R_DELAY_CLOUD_TO_HOST/1000.0), processingDelay);
                  }
-                  lastSeq = seq;
-                 break;
-              }
-              case MSG_CLOUD_RDY:
-              {
+                 return;
+             }
+        }
 
-                  getParentModule()->bubble("Ready to start");
-                  char str[50] = "Where is the book i am looking for?";
-                  message = generateNewMessage(str);
-                  message->setType(MSG_WHEREIS);
-                  sendMessage(message, 1);
-                  return;
-                  break;
-              }
-              case MSG_FOUND_LEFT:{
-                  getParentModule()->bubble("Book is left");
-                  scheduleAt(33.0, payBookDelay);
-                  break;
-              }
-              case MSG_FOUND_RIGHT:{
-                  getParentModule()->bubble("Book is right");
-                   scheduleAt(33.0, payBookDelay);
-                   break;
-               }
-              default:
-              {
-                EV << "No coded response pepehands.";
-              }
-            }
+
+
+        if(cMsg->getSource() == 0) {msgReceivedCloud++;}
+        else {msgReceivedComputer++;}
+
+
+        int type = cMsg->getType();
+        int src = cMsg->getSource();
+        int seq = cMsg->getSeq();
+        delete cMsg;
+
+        switch(type) {
+          case 0:
+          {
+              if (src == 0){
+                 cancelEvent(timeoutCloud);
+                 delete lastCloud;
+             } else {
+                 cancelEvent(timeoutFog);
+                 delete lastFog;
+             }
+              lastSeq = seq;
+             break;
+          }
+          case MSG_CLOUD_RDY:
+          {
+
+              getParentModule()->bubble("Ready to start");
+              char str[50] = "Where is the book i am looking for?";
+              message = generateNewMessage(str);
+              message->setType(MSG_WHEREIS);
+              sendMessage(message, 1);
+              return;
+              break;
+          }
+          case MSG_FOUND_LEFT:{
+            //   EV << "To be animated.";
+              getParentModule()->bubble("Book is left");
+              scheduleAt(18.5, browseBookDelay);
+              scheduleAt(33.0, payBookDelay);
+              break;
+          }
+          case MSG_FOUND_RIGHT:{
+            //    EV << "To be animated.";
+               getParentModule()->bubble("Book is RIGHT");
+               scheduleAt(18.5, browseBookDelay);
+               scheduleAt(33.0, payBookDelay);
+               break;
+           }
+          default:
+          {
+            EV << "No coded response pepehands.";
+          }
         }
 
 
@@ -198,14 +239,14 @@ void Host::resendLastMessage(int dest){
     } else if (dest == 1){
         msgSentComputer++;
         ComputerMessage *toSend = lastFog->dup();
-        send(toSend, "fogout");
-        scheduleAt(omnetpp::simTime()+timeout, timeoutFog);
+        sendDelayed(toSend,S_DELAY_HOST_TO_FOG / 1000.0, "fogout");
+        scheduleAt(omnetpp::simTime()+timeout+(S_DELAY_HOST_TO_FOG / 1000.0), timeoutFog);
 
     } else {
         msgSentCloud++;
         ComputerMessage *toSend = lastCloud->dup();
-        send(toSend, "cloudout");
-        scheduleAt(omnetpp::simTime()+timeout, timeoutCloud);
+        sendDelayed(toSend, S_DELAY_HOST_TO_CLOUD / 1000.0, "cloudout");
+        scheduleAt(omnetpp::simTime()+timeout+(S_DELAY_HOST_TO_CLOUD / 1000.0), timeoutCloud);
     }
 
 }
