@@ -31,6 +31,8 @@ void Cloud::initialize() {
     timeoutHost = new ComputerMessage("timeoutHost");
     timeoutFog = new ComputerMessage("timeoutFog");
 
+    side = par("leftRightSide").intValue();
+
     msgSentHost = 0;
     msgSentComputer = 0;
     msgReceivedHost = 0;
@@ -107,7 +109,6 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
                // Left or right
                EV << "Received request for book\n";
 
-               int side = par("leftRightSide").intValue();
                if (side == 0){
                    char str[40] = "Book is LEFT";
                    ComputerMessage* newMsg = generateNewMessage(str);
@@ -216,6 +217,17 @@ void Cloud::refreshDisplay() const{
         sprintf(label, "Total number of messages sent/received by the cloud: %ld", msgSentComputer+msgSentHost+msgReceivedComputer+msgReceivedHost);
         omnetpp::cCanvas *canvas = getParentModule()->getCanvas();
         omnetpp::cTextFigure *textFigure = omnetpp::check_and_cast<omnetpp::cTextFigure*>(canvas->getFigure("cloudsr"));
+        textFigure->setText(label);
+
+        int side = par("leftRightSide").intValue();
+        char direction[6];
+        if (side == 0){
+            sprintf(label, "Library - fog based version - LEFT");
+        }else{
+            sprintf(label, "Library - fog based version - RIGHT");
+        }
+        // Set title
+        textFigure = omnetpp::check_and_cast<omnetpp::cTextFigure*>(canvas->getFigure("title"));
         textFigure->setText(label);
 
 

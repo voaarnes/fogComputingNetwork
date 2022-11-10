@@ -92,6 +92,9 @@ network fogComputingNetwork
         @figure[smartphonesr](type=text; pos=5,90; font=,,bold; text="Total number of messages sent/received by the smartphone: N/A");
         
         
+        @figure[title](type=text; pos=600,10; font=,,bold; text="Library - fog based version - RIGHT");
+        
+        
         @figure[titlepowerspentsend](type=text; pos=5,130; font=,,bold; text="Total power spent when sending messages by:");
         @figure[powerspentsendcls](type=text; pos=5,150; font=,,bold; text="Cloud (from cloud to smartphone): N/A");
         @figure[powerspentsendclc](type=text; pos=5,170; font=,,bold; text="Cloud (from cloud to computer): N/A");
@@ -124,6 +127,34 @@ network fogComputingNetwork
         @figure[delayreceivescl](type=text; pos=5,710; font=,,bold; text="Smartphone (smartphone from cloud): N/A");
         @figure[delayreceivesc](type=text; pos=5,730; font=,,bold; text="Smartphone (smartphone from computer): N/A"); 
 
+
+		// Shelf text 
+		@figure[ss1](type=text; pos=550,300; font=,,bold; text="S");
+		@figure[sh1](type=text; pos=550,375; font=,,bold; text="H");
+		@figure[se1](type=text; pos=550,450; font=,,bold; text="E");
+		@figure[sl1](type=text; pos=550,525; font=,,bold; text="L");
+		@figure[sf1](type=text; pos=550,600; font=,,bold; text="F");
+		
+		@figure[ss2](type=text; pos=900,300; font=,,bold; text="S");
+		@figure[sh2](type=text; pos=900,375; font=,,bold; text="H");
+		@figure[se2](type=text; pos=900,450; font=,,bold; text="E");
+		@figure[sl2](type=text; pos=900,525; font=,,bold; text="L");
+		@figure[sf2](type=text; pos=900,600; font=,,bold; text="F");
+		
+		// Pillar text
+		@figure[pp1](type=text; pos=608,300; font=,,bold; text="P"; color=white);
+		@figure[pi1](type=text; pos=608,360; font=,,bold; text="I"; color=white);
+		@figure[pl1](type=text; pos=608,420; font=,,bold; text="L"; color=white);
+		@figure[pll1](type=text; pos=608,480; font=,,bold; text="L"; color=white);
+		@figure[pa1](type=text; pos=608,540; font=,,bold; text="A"; color=white);
+		@figure[pr1](type=text; pos=608,600; font=,,bold; text="R"; color=white);
+		
+		@figure[pp2](type=text; pos=833,300; font=,,bold; text="P"; color=white);
+		@figure[pi2](type=text; pos=833,360; font=,,bold; text="I"; color=white);
+		@figure[pl2](type=text; pos=833,420; font=,,bold; text="L"; color=white);
+		@figure[pll2](type=text; pos=833,480; font=,,bold; text="L"; color=white);
+		@figure[pa2](type=text; pos=833,540; font=,,bold; text="A"; color=white);
+		@figure[pr2](type=text; pos=833,600; font=,,bold; text="R"; color=white);
     types:
         
     submodules:

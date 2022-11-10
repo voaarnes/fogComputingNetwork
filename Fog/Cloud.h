@@ -45,7 +45,7 @@ private:
     ComputerMessage *lastFog = NULL;
     ComputerMessage *lastHost = NULL;
 
-
+    int side;
     long msgSentHost;
     long msgSentComputer;
     long msgReceivedHost;
