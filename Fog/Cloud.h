@@ -22,6 +22,7 @@
 #include "computerMessage_m.h"
 #include <omnetpp.h>
 #include "MessageType.h"
+#include "Constants.h"
 
 class Cloud: public omnetpp::cSimpleModule {
 public:
@@ -44,6 +45,8 @@ private:
     ComputerMessage * timeoutHost;
     ComputerMessage *lastFog = NULL;
     ComputerMessage *lastHost = NULL;
+    ComputerMessage *processingDelay = NULL;
+    ComputerMessage *cachedMessage = NULL;
 
 
     long msgSentHost;
