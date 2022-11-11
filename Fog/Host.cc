@@ -159,10 +159,10 @@ void Host::handleMessage(omnetpp::cMessage *msg){
         }
 
 
-
-        if(cMsg->getSource() == 0 && cMsg->getType() != 0) {msgReceivedCloud++;}
-        else {msgReceivedComputer++;}
-
+        if(cMsg->getType() != 1){
+            if(cMsg->getSource() == 0) {msgReceivedCloud++;}
+            else {msgReceivedComputer++;}
+        }
 
         int type = cMsg->getType();
         int src = cMsg->getSource();
@@ -234,9 +234,9 @@ void Host::ackMessage(ComputerMessage* msg){
     int source = msg->getSource();
     char msgText[30];
     if (source == 2){
-        sprintf(msgText, "ACK from Host to Computer", lastSeq);
+        sprintf(msgText, "ACK from Host to Computer");
     } else {
-        sprintf(msgText, "ACK from Host to Cloud", lastSeq);
+        sprintf(msgText, "ACK from Host to Cloud");
     }
     ack = generateNewMessage(msgText);
     ack->setType(MSG_ACK);

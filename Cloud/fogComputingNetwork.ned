@@ -54,8 +54,6 @@ simple Computer
 
 simple Host 
 {
-    parameters:
-        @display("i=device/pocketpc");
     gates:
         input fogin;
         input cloudin;
@@ -65,6 +63,8 @@ simple Host
 
 module HostShell extends StandardHost
 {
+    parameters:
+        @display("i=device/pocketpc");
 	gates:
         input fogin;
         input cloudin;

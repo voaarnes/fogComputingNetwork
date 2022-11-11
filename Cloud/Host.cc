@@ -138,9 +138,11 @@ void Host::handleMessage(omnetpp::cMessage *msg){
                  cMsg = cachedMessage;
                  msg = cachedMessage;
 
-            ComputerMessage *cmmsg = omnetpp::check_and_cast<ComputerMessage *>(msg);
-            if(cmmsg->getSource() == 0  && cmmsg->getType() != 0) {msgReceivedCloud++;}
-            else {msgReceivedComputer++;}
+            //ComputerMessage *cmmsg = omnetpp::check_and_cast<ComputerMessage *>(msg);
+            if(cMsg->getType() != 0){
+                if(src == 0) {msgReceivedCloud++;}
+                else {msgReceivedComputer++;}
+            }
 
                  EV << "Here we go again\n";
              } else if (cMsg->getType() != MSG_ACK) {
@@ -160,10 +162,6 @@ void Host::handleMessage(omnetpp::cMessage *msg){
              }
         }
 
-
-
-        if(cMsg->getSource() == 0) {msgReceivedCloud++;}
-        else {msgReceivedComputer++;}
 
 
         int type = cMsg->getType();

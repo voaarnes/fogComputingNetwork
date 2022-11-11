@@ -46,6 +46,7 @@ void Cloud::initialize() {
     ackReceivedHost = 0;
     ackReceivedComputer = 0;
 
+    WATCH(side);
     WATCH(msgSentHost);
     WATCH(msgSentComputer);
     WATCH(msgReceivedHost);
@@ -82,8 +83,10 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
 
    ComputerMessage *cMsg = dynamic_cast<ComputerMessage *>(msg);
    if (cMsg != processingDelay){
-       if(cMsg->getSource() == 1 && cMsg->getType() != 0) {msgReceivedComputer++;}
-          else {msgReceivedHost++;}
+       if(cMsg->getType() != 0){
+           if(cMsg->getSource() == 1) {msgReceivedComputer++;}
+           else {msgReceivedHost++;}
+       }
    }
 
 

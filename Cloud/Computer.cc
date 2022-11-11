@@ -93,8 +93,10 @@ void Computer::handleMessage(omnetpp::cMessage *msg) {
 
        ComputerMessage *cMsg = dynamic_cast<ComputerMessage *>(msg);
        if (cMsg != NULL){
-           if(cMsg->getSource() == 0  && cMsg->getType() != 0) {msgReceivedCloud++;}
-           else {msgReceivedHost++;}
+           if(cMsg->getType() != 0){
+               if(cMsg->getSource() == 0  && cMsg->getType() != 0) {msgReceivedCloud++;}
+               else {msgReceivedHost++;}
+           }
 
            if (cMsg->getType() != 0){
                EV << "ACKING";
