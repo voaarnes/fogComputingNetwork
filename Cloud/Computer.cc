@@ -28,6 +28,8 @@ Computer::~Computer() {
     // TODO Auto-generated destructor stub
     cancelEvent(timeoutHost);
     cancelEvent(timeoutCloud);
+    canclEvent(processingDelay);
+    delete processingDelay;
     delete timeoutCloud;
     delete timeoutHost;
 }

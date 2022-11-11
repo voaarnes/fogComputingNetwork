@@ -50,6 +50,8 @@ private:
     int lastSeq = 0;
     int msgLost = 0;
 
+    bool paid = false;
+
     long msgSentCloud;
     long msgSentComputer;
     long msgReceivedCloud;

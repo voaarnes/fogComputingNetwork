@@ -24,6 +24,8 @@ Host::~Host() {
     // TODO Auto-generated destructor stub
     cancelEvent(timeoutCloud);
     cancelEvent(timeoutFog);
+    canclEvent(processingDelay);
+    delete processingDelay;
     delete timeoutFog;
     delete timeoutCloud;
 }
@@ -117,6 +119,10 @@ void Host::handleMessage(omnetpp::cMessage *msg){
             return;
         }
         else if (msg == payBookDelay){
+            // To stop weird bug where this happens twice
+            // Even thoough the event is deleted
+            if (paid) return;
+            paid = true;
             char str[20] = "Pay the book.";
             message = generateNewMessage(str);
             message->setType(MSG_BOOK_PAY);
@@ -202,14 +208,15 @@ void Host::handleMessage(omnetpp::cMessage *msg){
                   getParentModule()->bubble("Book is left");
                   scheduleAt(18.5, browseBookDelay);
                   scheduleAt(33.0, payBookDelay);
-                  break;
+
+                  return;
               }
               case MSG_FOUND_RIGHT:{
                 //    EV << "To be animated.";
                    getParentModule()->bubble("Book is RIGHT");
                    scheduleAt(18.5, browseBookDelay);
                    scheduleAt(33.0, payBookDelay);
-                   break;
+                   return;
                }
               default:
               {

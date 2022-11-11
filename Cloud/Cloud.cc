@@ -256,6 +256,8 @@ void Cloud::sendMessage(ComputerMessage* msg, int dest){
 Cloud::~Cloud() {
     cancelEvent(timeoutHost);
     cancelEvent(timeoutFog);
+    canclEvent(processingDelay);
+    delete processingDelay;
     delete timeoutFog;
     delete timeoutHost;
 }

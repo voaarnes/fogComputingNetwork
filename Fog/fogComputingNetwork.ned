@@ -176,9 +176,9 @@ network fogComputingNetwork
         
     connections allowunconnected:
         cloud.fogout --> {delay = 300ms;} --> computer.cloudin;
-        cloud.hostout --> {delay = 400ms;} --> host.cloudin;
+        //cloud.hostout --> {delay = 400ms;} --> host.cloudin;
         host.fogout --> {delay = 50ms;} --> computer.hostin;
-        host.cloudout --> {delay = 400ms;} --> cloud.hostin;
+        //host.cloudout --> {delay = 400ms;} --> cloud.hostin;
         computer.cloudout --> {delay = 300ms;} --> cloud.fogin;
         computer.hostout --> {delay = 50ms;} --> host.fogin;
 }
