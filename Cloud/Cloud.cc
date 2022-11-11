@@ -120,7 +120,7 @@ void Cloud::handleMessage(omnetpp::cMessage *msg) {
        switch (type){
            case 0: {
 
-               if(cMsg->getSource() == 1) {ackReceivedComputer++;}
+               if(src == 1) {ackReceivedComputer++;}
                else {ackReceivedHost++;}
 
                if (src == 1){
