@@ -159,26 +159,27 @@ void Host::handleMessage(omnetpp::cMessage *msg){
         }
 
 
-        if(cMsg->getType() != 1){
-            if(cMsg->getSource() == 0) {msgReceivedCloud++;}
-            else {msgReceivedComputer++;}
-        }
+
 
         int type = cMsg->getType();
         int src = cMsg->getSource();
         int seq = cMsg->getSeq();
         delete cMsg;
 
+        if(type != 0){
+            if(src == 0) {msgReceivedCloud++;}
+            else {msgReceivedComputer++;}
+        }
+
         switch(type) {
           case MSG_ACK:
           {
-              if(cMsg->getSource() == 0) {ackReceivedCloud++;}
-              else {ackReceivedComputer++;}
-
               if (src == 0){
+                 ackReceivedCloud++;
                  cancelEvent(timeoutCloud);
                  delete lastCloud;
              } else {
+                 ackReceivedComputer++;
                  cancelEvent(timeoutFog);
                  delete lastFog;
              }

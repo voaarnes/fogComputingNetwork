@@ -130,11 +130,9 @@ void Computer::handleMessage(omnetpp::cMessage *msg) {
            switch (type){
                case MSG_ACK: {
 
-                   if(src == 0) {ackReceivedCloud++;}
-                   else {ackReceivedHost++;}
-
                    lastSeq = seq;
                    if (src == 0){
+                       ackReceivedCloud++;
                        cancelEvent(timeoutCloud);
                        // Fog stuff
                        if (lastCloud->getType() == MSG_CONTENTS){
@@ -149,6 +147,7 @@ void Computer::handleMessage(omnetpp::cMessage *msg) {
 
                        delete lastCloud;
                    } else {
+                       ackReceivedHost++;
                        cancelEvent(timeoutHost);
                        delete lastHost;
                    }
